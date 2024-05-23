@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Display</title>
+</head>
+
+<body>
+    <h1>Data from DataFrame</h1>
+    <table border="1">
+        <tr>
+            <th>Name</th>
+        </tr>
+        {% for row in data %}
+        <tr>
+            <td>{{ row.Name }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <h1>Image Example</h1>
+    <img src="{{ url_for('static', filename='images/handle.png') }}" alt="Example Image">
+</body>
+
+</html>

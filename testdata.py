@@ -1,8 +1,29 @@
 import pandas as pd
+import re
 df = pd.read_csv('games.csv', encoding = 'utf-8')
-# print(df.columns)
+print(df.columns)
 # print(df[['AppID','Name','Price','Metacritic score','Genres','Categories','Windows','Mac','Linux']].sort_values(by='Notes', ascending=False).head(10))
 # print(df[['Name','Price','Metacritic score']].sort_values(by='Metacritic score', ascending=False).head(10))
+
+def to_date(datein):
+    if type(datein) != str:
+        return datein
+    print(datein)
+    month_dict = {'Jan': '01', 'Feb': '02', 'Mar': '03', 'Apr': '04', 'May': '05', 'Jun': '06', 'Jul': '07', 'Aug': '08', 'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dec': '12'}
+    datein = datein.replace(',', '')
+    datein = datein.split(' ')
+    date = datein[1]
+    month = datein[0]
+    if len(date) > 2:
+        year = date
+        date = '01'
+    else:
+        year = datein[2]
+    
+    if len(date) == 1:
+        date = '0' + date
+    month = month_dict[month]
+    return f"{date}/{month}/{year}"
 
 def get_all_categories():
     categories = df['Categories']
@@ -95,9 +116,9 @@ def order_by_price(df):
 def order_by_price_reverse(df):
     return df.sort_values(by='Price', ascending=False)
 
+print(df['Release date'].apply(to_date))
 
-
-print(get_games_by_tag(['Local Multiplayer','Atmospheric','VR']))
+# print(order_by_price(get_games_by_tag(['Local Multiplayer','Atmospheric','VR'])))
 # print(get_games_by_genre(['Action']))
 # print(get_games_by_category(['LAN PvP']))
 # print(get_games_by_name('the last of', get_games_by_genre([''],order_by_alphabetical(df)))[['Name','Genres']].values)
