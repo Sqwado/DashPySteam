@@ -79,38 +79,47 @@
             <div class="w-full flex items-center justify-center text-white mt-8">
                 <div class="w-5/6 max-h-80 overflow-y-scroll p-8 rounded bg-[#1B2838]">
                     <h3 class=" text-xl text-center">Genres</h3>
-                    <a href="#">
+                    <label>
                         {% for row in tag %}
+                        <input type="checkbox" />
                         {{ row }}
                         {% endfor %}
-                    </a></div>
+                    </label>
+
+                </div>
             </div>
             <div class="w-full flex items-center justify-center text-white mt-8">
                 <div class="w-5/6 max-h-80 overflow-y-scroll p-8 rounded bg-[#1B2838]">
                     <h3 class=" text-xl text-center">Tags</h3>
-                    <a href="#">
+                    <label>
                         {% for row in tag %}
+                        <input type="checkbox" />
                         {{ row }}
                         {% endfor %}
-                    </a></div>
+                    </label>
+                </div>
             </div>
             <div class="w-full flex items-center justify-center text-white mt-8">
                 <div class="w-5/6 max-h-80 overflow-y-scroll p-8 rounded bg-[#1B2838]">
                     <h3 class=" text-xl text-center">Plateformes</h3>
-                    <a href="#">
+                    <label>
                         {% for row in tag %}
+                        <input type="checkbox" />
                         {{ row }}
                         {% endfor %}
-                    </a></div>
+                    </label>
+                </div>
             </div>
             <div class="w-full flex items-center justify-center text-white mt-8">
                 <div class="w-5/6 max-h-80 overflow-y-scroll p-8 rounded bg-[#1B2838]">
                     <h3 class=" text-xl text-center">Categorie</h3>
-                    <a href="#">
+                    <label>
                         {% for row in tag %}
+                        <input type="checkbox" />
                         {{ row }}
                         {% endfor %}
-                    </a></div>
+                    </label>
+                </div>
             </div>
 
 
@@ -235,22 +244,22 @@
             </div>
 
         </article>
-        <div class="w-1/6 h-full bg-blue-600">
+        <div class="w-1/6 h-full flex justify-center">
             <div class="relative inline-block text-left">
                 <div>
-                    <button type="button" class="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" id="menu-button" aria-expanded="false" aria-haspopup="true">
+                    <button type="button" class="inline-flex mt-8 w-full justify-center gap-x-1.5 rounded-md bg-[#171D25] px-3 py-2 text-sm font-semibold text-white shadow-sm ring-1 ring-inset ring-gray-300" id="menu-button" aria-expanded="false" aria-haspopup="true">
                         Filtre
                         <svg class="-mr-1 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                             <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
                         </svg>
                     </button>
                 </div>
-                <div class="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none hidden" id="dropdown-menu" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
+                <div class="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-[#171D25] shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none hidden" id="dropdown-menu" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
                     <div class="py-1" role="none">
-                        <a href="#" class="text-gray-700 block px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-0">Prix Croissant</a>
-                        <a href="#" class="text-gray-700 block px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-1">Prix Décroissant</a>
-                        <a href="#" class="text-gray-700 block px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-2">Ordre Alphabétique</a>
-                        <a href="#" class="text-gray-700 block px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-3">Ordre Anti-Alphabétique</a>
+                        <a href="#" class="text-white bg-[#171D25] block px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-0">Prix Croissant</a>
+                        <a href="#" class="text-white bg-[#171D25] block px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-1">Prix Décroissant</a>
+                        <a href="#" class="text-white bg-[#171D25] block px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-2">Ordre Alphabétique</a>
+                        <a href="#" class="text-white bg-[#171D25] block px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-3">Ordre Anti-Alphabétique</a>
                     </div>
                 </div>
             </div>
