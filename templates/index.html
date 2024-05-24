@@ -27,23 +27,46 @@
 </html> -->
 
 <!DOCTYPE html>
-
+<html lang="fr">
 <head>
     <title>Mon programme</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
+<style>
+    /* width */
+    ::-webkit-scrollbar {
+        width: 10px;
+    }
 
-<body class="w-screen h-screen bg-[#1B2838]">
+    /* Track */
+    ::-webkit-scrollbar-track {
+        background: #1B2838;
+    }
+
+    /* Handle */
+    ::-webkit-scrollbar-thumb {
+        background: #171D25;
+        border-radius: 8px;
+    }
+
+    /* Handle on hover */
+    ::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+
+</style>
+
+<body class="w-screen h-screen bg-[#1B2838] overflow-x-hidden">
     <header class="w-screen h-1/6 bg-[#171D25] flex">
-        <div class="w-1/6 h-full">
-            <img src="{{ url_for('static', filename='images/logo_steam.png') }}" alt="logo steam" />
+        <div class="w-1/6 h-full flex items-center justify-center">
+            <img src="{{ url_for('static', filename='images/logo_steam.png') }}" alt="logo steam" class="h-3/6" />
         </div>
         <nav class="w-4/6 h-full flex items-center justify-center">
             <input class="h-2/6 w-2/6 rounded p-2 text-white bg-[#1B2838]"
                 placeholder="Recherchez le nom d'un jeu..." />
         </nav>
         <div class="w-1/6 h-full">
-            <div class="w-full h-1/6 flex justify-end text-white pr-2">
+            <div class="w-full h-1/6 flex justify-end text-white pr-6">
                 <a href="#">CRUD </a>
                 <a href="#"> | Text |</a>
                 <a href="#">Courbe</a>
@@ -51,17 +74,206 @@
         </div>
     </header>
     <main class="w-screen h-5/6 flex ">
-        <aside class="w-1/6 h-full bg-[#171D25] ">
-            {% for row in tag %}
-            <div class="w-full h-1/6 flex items-center justify-center text-white">
-                <a href="#">{{ row }}</a>
+        <aside class="w-1/6 h-full bg-[#171D25] overflow-y-scroll pb-6 ">
+
+            <div class="w-full flex items-center justify-center text-white mt-8">
+                <div class="w-5/6 max-h-80 overflow-y-scroll p-8 rounded bg-[#1B2838]">
+                    <h3 class=" text-xl text-center">Genres</h3>
+                    <a href="#">
+                        {% for row in tag %}
+                        {{ row }}
+                        {% endfor %}
+                    </a></div>
             </div>
-            {% endfor %}
+            <div class="w-full flex items-center justify-center text-white mt-8">
+                <div class="w-5/6 max-h-80 overflow-y-scroll p-8 rounded bg-[#1B2838]">
+                    <h3 class=" text-xl text-center">Tags</h3>
+                    <a href="#">
+                        {% for row in tag %}
+                        {{ row }}
+                        {% endfor %}
+                    </a></div>
+            </div>
+            <div class="w-full flex items-center justify-center text-white mt-8">
+                <div class="w-5/6 max-h-80 overflow-y-scroll p-8 rounded bg-[#1B2838]">
+                    <h3 class=" text-xl text-center">Plateformes</h3>
+                    <a href="#">
+                        {% for row in tag %}
+                        {{ row }}
+                        {% endfor %}
+                    </a></div>
+            </div>
+            <div class="w-full flex items-center justify-center text-white mt-8">
+                <div class="w-5/6 max-h-80 overflow-y-scroll p-8 rounded bg-[#1B2838]">
+                    <h3 class=" text-xl text-center">Categorie</h3>
+                    <a href="#">
+                        {% for row in tag %}
+                        {{ row }}
+                        {% endfor %}
+                    </a></div>
+            </div>
+
 
         </aside>
-        <article class="w-4/6 h-full bg-blue-500"></article>
-        <div class="w-1/6 h-full bg-blue-600"></div>
+        <article class="w-4/6 flex flex-wrap p-8">
+            <div class="w-1/5 h-1/5 ml-4 mr-4 bg-[#171D25] rounded p-1">
+                <div class="h-5/6 w-full bg-blue-500">
+                    <img src="" alt="image jeu">
+                </div>
+                <div class="w-full h-1/6 flex">
+                    <div class="w-1/2 pl-2">
+                        <p class="text-white">Nom du jeu</p>
+                    </div>
+                    <div class=" w-1/2 text-right pr-2">
+                        <p class="text-white">Prix du jeu</p>
+                    </div>
+                </div>
+            </div>
+            <div class="w-1/5 h-1/5 ml-4 mr-4 bg-[#171D25] rounded p-1">
+                <div class="h-5/6 w-full bg-blue-500">
+                    <img src="" alt="image jeu">
+                </div>
+                <div class="w-full h-1/6 flex">
+                    <div class="w-1/2 pl-2">
+                        <p class="text-white">Nom du jeu</p>
+                    </div>
+                    <div class=" w-1/2 text-right pr-2">
+                        <p class="text-white">Prix du jeu</p>
+                    </div>
+                </div>
+            </div>
+            <div class="w-1/5 h-1/5 ml-4 mr-4 bg-[#171D25] rounded p-1">
+                <div class="h-5/6 w-full bg-blue-500">
+                    <img src="" alt="image jeu">
+                </div>
+                <div class="w-full h-1/6 flex">
+                    <div class="w-1/2 pl-2">
+                        <p class="text-white">Nom du jeu</p>
+                    </div>
+                    <div class=" w-1/2 text-right pr-2">
+                        <p class="text-white">Prix du jeu</p>
+                    </div>
+                </div>
+            </div>
+            <div class="w-1/5 h-1/5 ml-4 mr-4 bg-[#171D25] rounded p-1">
+                <div class="h-5/6 w-full bg-blue-500">
+                    <img src="" alt="image jeu">
+                </div>
+                <div class="w-full h-1/6 flex">
+                    <div class="w-1/2 pl-2">
+                        <p class="text-white">Nom du jeu</p>
+                    </div>
+                    <div class=" w-1/2 text-right pr-2">
+                        <p class="text-white">Prix du jeu</p>
+                    </div>
+                </div>
+            </div>
+            <div class="w-1/5 h-1/5 ml-4 mr-4 bg-[#171D25] rounded p-1">
+                <div class="h-5/6 w-full bg-blue-500">
+                    <img src="" alt="image jeu">
+                </div>
+                <div class="w-full h-1/6 flex">
+                    <div class="w-1/2 pl-2">
+                        <p class="text-white">Nom du jeu</p>
+                    </div>
+                    <div class=" w-1/2 text-right pr-2">
+                        <p class="text-white">Prix du jeu</p>
+                    </div>
+                </div>
+            </div>
+            <div class="w-1/5 h-1/5 ml-4 mr-4 bg-[#171D25] rounded p-1">
+                <div class="h-5/6 w-full bg-blue-500">
+                    <img src="" alt="image jeu">
+                </div>
+                <div class="w-full h-1/6 flex">
+                    <div class="w-1/2 pl-2">
+                        <p class="text-white">Nom du jeu</p>
+                    </div>
+                    <div class=" w-1/2 text-right pr-2">
+                        <p class="text-white">Prix du jeu</p>
+                    </div>
+                </div>
+            </div>
+            <div class="w-1/5 h-1/5 ml-4 mr-4 bg-[#171D25] rounded p-1">
+                <div class="h-5/6 w-full bg-blue-500">
+                    <img src="" alt="image jeu">
+                </div>
+                <div class="w-full h-1/6 flex">
+                    <div class="w-1/2 pl-2">
+                        <p class="text-white">Nom du jeu</p>
+                    </div>
+                    <div class=" w-1/2 text-right pr-2">
+                        <p class="text-white">Prix du jeu</p>
+                    </div>
+                </div>
+            </div>
+            <div class="w-1/5 h-1/5 ml-4 mr-4 bg-[#171D25] rounded p-1">
+                <div class="h-5/6 w-full bg-blue-500">
+                    <img src="" alt="image jeu">
+                </div>
+                <div class="w-full h-1/6 flex">
+                    <div class="w-1/2 pl-2">
+                        <p class="text-white">Nom du jeu</p>
+                    </div>
+                    <div class=" w-1/2 text-right pr-2">
+                        <p class="text-white">Prix du jeu</p>
+                    </div>
+                </div>
+            </div>
+            <div class="w-1/5 h-1/5 ml-4 mr-4 bg-[#171D25] rounded p-1">
+                <div class="h-5/6 w-full bg-blue-500">
+                    <img src="" alt="image jeu">
+                </div>
+                <div class="w-full h-1/6 flex">
+                    <div class="w-1/2 pl-2">
+                        <p class="text-white">Nom du jeu</p>
+                    </div>
+                    <div class=" w-1/2 text-right pr-2">
+                        <p class="text-white">Prix du jeu</p>
+                    </div>
+                </div>
+            </div>
+
+        </article>
+        <div class="w-1/6 h-full bg-blue-600">
+            <div class="relative inline-block text-left">
+                <div>
+                    <button type="button" class="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" id="menu-button" aria-expanded="false" aria-haspopup="true">
+                        Filtre
+                        <svg class="-mr-1 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none hidden" id="dropdown-menu" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
+                    <div class="py-1" role="none">
+                        <a href="#" class="text-gray-700 block px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-0">Prix Croissant</a>
+                        <a href="#" class="text-gray-700 block px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-1">Prix Décroissant</a>
+                        <a href="#" class="text-gray-700 block px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-2">Ordre Alphabétique</a>
+                        <a href="#" class="text-gray-700 block px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-3">Ordre Anti-Alphabétique</a>
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
 </body>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const menuButton = document.getElementById('menu-button');
+        const dropdownMenu = document.getElementById('dropdown-menu');
 
+        menuButton.addEventListener('click', function() {
+            const isExpanded = menuButton.getAttribute('aria-expanded') === 'true';
+            menuButton.setAttribute('aria-expanded', !isExpanded);
+            dropdownMenu.classList.toggle('hidden');
+        });
+
+        document.addEventListener('click', function(event) {
+            if (!menuButton.contains(event.target) && !dropdownMenu.contains(event.target)) {
+                dropdownMenu.classList.add('hidden');
+                menuButton.setAttribute('aria-expanded', 'false');
+            }
+        });
+    });
+</script>
 </html>
