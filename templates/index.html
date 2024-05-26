@@ -28,6 +28,7 @@
 
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <title>Mon programme</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -53,252 +54,502 @@
     ::-webkit-scrollbar-thumb:hover {
         background: #555;
     }
-
 </style>
 
 <body class="w-screen h-screen bg-[#1B2838] overflow-x-hidden">
     <header class="w-screen h-1/6 bg-[#171D25] flex">
-        <div class="w-1/6 h-full flex items-center justify-center">
+        <a href="/" class="w-1/6 h-full flex items-center justify-center">
             <img src="{{ url_for('static', filename='images/logo_steam.png') }}" alt="logo steam" class="h-3/6" />
-        </div>
+        </a>
         <nav class="w-4/6 h-full flex items-center justify-center">
-            <input class="h-2/6 w-2/6 rounded p-2 text-white bg-[#1B2838]"
-                placeholder="Recherchez le nom d'un jeu..." />
+            <input class="h-2/6 w-2/6 rounded p-2 text-white bg-[#1B2838]" placeholder="Recherchez le nom d'un jeu..."
+                type="text" id="search-bar" />
+            <button class="h-2/6 rounded bg-[#1B2838] text-white ml-4 p-2 hover:bg-[#171D25]"
+                id="search">Rechercher</button>
         </nav>
-        <div class="w-1/6 h-full">
-            <div class="w-full h-1/6 flex justify-end text-white pr-6">
-                <a href="#">CRUD </a>
-                <a href="#"> | Text |</a>
-                <a href="#">Courbe</a>
+        <div class="w-1/6 h-full flex items-center justify-center">
+            <div class="relative inline-block text-left">
+                <label for="sort-select" class="text-white">Trier par :</label>
+                <select
+                    class=" rounded-md bg-[#171D25] px-3 py-2 text-sm font-semibold text-white shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent cursor-pointer mr-4"
+                    id="sort-select">
+                    <option value="alpha-asc">Ordre Alphabétique</option>
+                    <option value="alpha-desc">Ordre Anti-Alphabétique</option>
+                    <option value="price-asc">Prix Croissant</option>
+                    <option value="price-desc">Prix Décroissant</option>
+                </select>
             </div>
         </div>
     </header>
+
     <main class="w-screen h-5/6 flex ">
+
         <aside class="w-1/6 h-full bg-[#171D25] overflow-y-scroll pb-6 ">
 
-            <div class="w-full flex items-center justify-center text-white mt-8">
-                <div class="w-5/6 max-h-80 overflow-y-scroll p-8 rounded bg-[#1B2838]">
-                    <h3 class=" text-xl text-center">Genres</h3>
-                    {% for row in tag %}
-                    <div class="w-5/6 flex flex-wrap justify-center">
-                    <label class="h-full m-4">
-
-                        <input type="checkbox" />
-                        {{ row }}
-                    </label>
+            <div class="w-full flex items-center justify-center text-white mt-2">
+                <div class="w-5/6 p-2 m-4 rounded bg-[#1B2838]">
+                    <h3 class=" text-xl text-center cursor-pointer mb-2" id="prix-title">Prix <img
+                            src="{{ url_for('static', filename='images/downarrow.svg') }}" alt="arrow"
+                            class=" h-4 w-4 inline ml-2" id="prix-arrow" /></h3>
+                    <div class="max-h-80 overflow-y-scroll content hidden" id="prix-content">
+                        <div class="flex flex-wrap justify-left bg-[#171D25] m-1 rounded">
+                            <label class="h-full m-1">
+                                Min
+                                <input type="number" name="prix" value="{{ min_price }}" class="prix w-full text-black"
+                                    min="0" id="prix-min" />
+                            </label>
+                        </div>
+                        <div class="flex flex-wrap justify-left bg-[#171D25] m-1 rounded">
+                            <label class="h-full m-1">
+                                Max
+                                <input type="number" name="prix" value="{{ max_price }}" class="prix w-full text-black"
+                                    min="0" id="prix-max" />
+                            </label>
+                        </div>
                     </div>
-                        {% endfor %}
-
-
-                </div>
-            </div>
-            <div class="w-full flex items-center justify-center text-white mt-8">
-                <div class="w-5/6 max-h-80 overflow-y-scroll p-8 rounded bg-[#1B2838]">
-                    <h3 class=" text-xl text-center">Tags</h3>
-                    {% for row in tag %}
-                    <div class="w-5/6 flex flex-wrap justify-center">
-                    <label class="h-full m-4">
-
-                        <input type="checkbox" />
-                        {{ row }}
-                    </label>
-                    </div>
-                        {% endfor %}
-
-                </div>
-            </div>
-            <div class="w-full flex items-center justify-center text-white mt-8">
-                <div class="w-5/6 max-h-80 overflow-y-scroll p-8 rounded bg-[#1B2838]">
-                    <h3 class=" text-xl text-center">Plateformes</h3>
-                    {% for row in tag %}
-                    <div class="w-5/6 flex flex-wrap justify-center">
-                    <label class="h-full m-4">
-
-                        <input type="checkbox" />
-                        {{ row }}
-                    </label>
-                    </div>
-                        {% endfor %}
-
-                </div>
-            </div>
-            <div class="w-full flex items-center justify-center text-white mt-8">
-                <div class="w-5/6 max-h-80 overflow-y-scroll p-8 rounded bg-[#1B2838]">
-                    <h3 class=" text-xl text-center">Categorie</h3>
-                    {% for row in tag %}
-                    <div class="w-5/6 flex flex-wrap justify-center">
-                    <label class="h-full m-4">
-
-                        <input type="checkbox" />
-                        {{ row }}
-                    </label>
-                    </div>
-                        {% endfor %}
-
                 </div>
             </div>
 
+            <div class="w-full flex items-center justify-center text-white mt-2">
+                <div class="w-5/6 p-2 m-4 rounded bg-[#1B2838]">
+                    <h3 class=" text-xl text-center cursor-pointer mb-2" id="genre-title">Genre <img
+                            src="{{ url_for('static', filename='images/downarrow.svg') }}" alt="arrow"
+                            class=" h-4 w-4 inline ml-2" id="genre-arrow" /></h3>
+                    <div class="max-h-80 overflow-y-scroll content hidden" id="genre-content">
+                        {% for row in genre %}
+                        <div class="flex flex-wrap justify-left bg-[#171D25] m-1 rounded">
+                            <label class="h-full m-1">
+
+                                <input type="checkbox" name="genre" value="{{ row }}" class="genre" />
+                                {{ row }}
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="w-full flex items-center justify-center text-white mt-2">
+                <div class="w-5/6 p-2 m-4 rounded bg-[#1B2838]">
+                    <h3 class=" text-xl text-center cursor-pointer mb-2" id="tag-title">Tags <img
+                            src="{{ url_for('static', filename='images/downarrow.svg') }}" alt="arrow"
+                            class=" h-4 w-4 inline ml-2" id="tag-arrow" /></h3>
+                    <div class="max-h-80 overflow-y-scroll content hidden" id="tag-content">
+                        {% for row in tag %}
+                        <div class="flex flex-wrap justify-left bg-[#171D25] m-1 rounded">
+                            <label class="h-full m-1">
+
+                                <input type="checkbox" name="tag" value="{{ row }}" class="tag" />
+                                {{ row }}
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="w-full flex items-center justify-center text-white mt-2">
+                <div class="w-5/6 p-2 m-4 rounded bg-[#1B2838]">
+                    <h3 class=" text-xl text-center cursor-pointer mb-2" id="platform-title">Plateforme <img
+                            src="{{ url_for('static', filename='images/downarrow.svg') }}" alt="arrow"
+                            class=" h-4 w-4 inline ml-2" id="platform-arrow" /></h3>
+                    <div class="max-h-80 overflow-y-scroll content hidden" id="platform-content">
+                        {% for row in platform %}
+                        <div class="flex flex-wrap justify-left bg-[#171D25] m-1 rounded">
+                            <label class="h-full m-1">
+
+                                <input type="checkbox" name="platform" value="{{ row }}" class="platform" />
+                                {{ row }}
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="w-full flex items-center justify-center text-white mt-2">
+                <div class="w-5/6 p-2 m-4 rounded bg-[#1B2838]">
+                    <h3 class=" text-xl text-center cursor-pointer mb-2" id="category-title">Gategory <img
+                            src="{{ url_for('static', filename='images/downarrow.svg') }}" alt="arrow"
+                            class=" h-4 w-4 inline ml-2" id="category-arrow" /></h3>
+                    <div class="max-h-80 overflow-y-scroll content hidden" id="category-content">
+                        {% for row in category %}
+                        <div class="flex flex-wrap justify-left bg-[#171D25] m-1 rounded">
+                            <label class="h-full m-1">
+                                <input type="checkbox" name="category" value="{{ row }}" class="category" />
+                                {{ row }}
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="w-full flex items-center justify-center mt-4">
+                <button class="px-4 py-2 ml-2 mr-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                    id="apply">Appliquer les
+                    filtres</button>
+            </div>
+
+            <div class="w-full flex items-center justify-center mt-4">
+                <button class="px-4 py-2 ml-2 mr-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                    id="reset">Réinitialiser les
+                    filtres</button>
+            </div>
 
         </aside>
-        <article class="w-4/6 flex flex-wrap p-8">
-            <div class="w-1/5 h-1/5 ml-4 mr-4 bg-[#171D25] rounded p-1">
-                <div class="h-5/6 w-full bg-blue-500">
-                    <img src="" alt="image jeu">
+
+        <article class="w-full h-full p-2">
+            <div class="w-full h-8 flex items-center justify-between">
+                <div class="w-4/6 h-8 flex justify-left">
+                    <h1 class="text-white">Résultats de recherche</h1>
+                    <p class="text-white ml-2">({{ total_games }} résultats)</p>
                 </div>
-                <div class="w-full h-1/6 flex">
-                    <div class="w-1/2 pl-2">
-                        <p class="text-white">Nom du jeu</p>
-                    </div>
-                    <div class=" w-1/2 text-right pr-2">
-                        <p class="text-white">Prix du jeu</p>
-                    </div>
-                </div>
-            </div>
-            <div class="w-1/5 h-1/5 ml-4 mr-4 bg-[#171D25] rounded p-1">
-                <div class="h-5/6 w-full bg-blue-500">
-                    <img src="" alt="image jeu">
-                </div>
-                <div class="w-full h-1/6 flex">
-                    <div class="w-1/2 pl-2">
-                        <p class="text-white">Nom du jeu</p>
-                    </div>
-                    <div class=" w-1/2 text-right pr-2">
-                        <p class="text-white">Prix du jeu</p>
-                    </div>
-                </div>
-            </div>
-            <div class="w-1/5 h-1/5 ml-4 mr-4 bg-[#171D25] rounded p-1">
-                <div class="h-5/6 w-full bg-blue-500">
-                    <img src="" alt="image jeu">
-                </div>
-                <div class="w-full h-1/6 flex">
-                    <div class="w-1/2 pl-2">
-                        <p class="text-white">Nom du jeu</p>
-                    </div>
-                    <div class=" w-1/2 text-right pr-2">
-                        <p class="text-white">Prix du jeu</p>
-                    </div>
-                </div>
-            </div>
-            <div class="w-1/5 h-1/5 ml-4 mr-4 bg-[#171D25] rounded p-1">
-                <div class="h-5/6 w-full bg-blue-500">
-                    <img src="" alt="image jeu">
-                </div>
-                <div class="w-full h-1/6 flex">
-                    <div class="w-1/2 pl-2">
-                        <p class="text-white">Nom du jeu</p>
-                    </div>
-                    <div class=" w-1/2 text-right pr-2">
-                        <p class="text-white">Prix du jeu</p>
-                    </div>
-                </div>
-            </div>
-            <div class="w-1/5 h-1/5 ml-4 mr-4 bg-[#171D25] rounded p-1">
-                <div class="h-5/6 w-full bg-blue-500">
-                    <img src="" alt="image jeu">
-                </div>
-                <div class="w-full h-1/6 flex">
-                    <div class="w-1/2 pl-2">
-                        <p class="text-white">Nom du jeu</p>
-                    </div>
-                    <div class=" w-1/2 text-right pr-2">
-                        <p class="text-white">Prix du jeu</p>
-                    </div>
-                </div>
-            </div>
-            <div class="w-1/5 h-1/5 ml-4 mr-4 bg-[#171D25] rounded p-1">
-                <div class="h-5/6 w-full bg-blue-500">
-                    <img src="" alt="image jeu">
-                </div>
-                <div class="w-full h-1/6 flex">
-                    <div class="w-1/2 pl-2">
-                        <p class="text-white">Nom du jeu</p>
-                    </div>
-                    <div class=" w-1/2 text-right pr-2">
-                        <p class="text-white">Prix du jeu</p>
-                    </div>
-                </div>
-            </div>
-            <div class="w-1/5 h-1/5 ml-4 mr-4 bg-[#171D25] rounded p-1">
-                <div class="h-5/6 w-full bg-blue-500">
-                    <img src="" alt="image jeu">
-                </div>
-                <div class="w-full h-1/6 flex">
-                    <div class="w-1/2 pl-2">
-                        <p class="text-white">Nom du jeu</p>
-                    </div>
-                    <div class=" w-1/2 text-right pr-2">
-                        <p class="text-white">Prix du jeu</p>
-                    </div>
-                </div>
-            </div>
-            <div class="w-1/5 h-1/5 ml-4 mr-4 bg-[#171D25] rounded p-1">
-                <div class="h-5/6 w-full bg-blue-500">
-                    <img src="" alt="image jeu">
-                </div>
-                <div class="w-full h-1/6 flex">
-                    <div class="w-1/2 pl-2">
-                        <p class="text-white">Nom du jeu</p>
-                    </div>
-                    <div class=" w-1/2 text-right pr-2">
-                        <p class="text-white">Prix du jeu</p>
-                    </div>
-                </div>
-            </div>
-            <div class="w-1/5 h-1/5 ml-4 mr-4 bg-[#171D25] rounded p-1">
-                <div class="h-5/6 w-full bg-blue-500">
-                    <img src="" alt="image jeu">
-                </div>
-                <div class="w-full h-1/6 flex">
-                    <div class="w-1/2 pl-2">
-                        <p class="text-white">Nom du jeu</p>
-                    </div>
-                    <div class=" w-1/2 text-right pr-2">
-                        <p class="text-white">Prix du jeu</p>
-                    </div>
+                <div class="w-2/6 h-8 flex justify-end mr-2">
+                    <p class="text-white">Jeux par page :</p>
+                    <select
+                        class="w-16 h-8 rounded bg-[#171D25] text-white text-center focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        id="games-per-page">
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+
                 </div>
             </div>
 
-        </article>
-        <div class="w-1/6 h-full flex justify-center">
-            <div class="relative inline-block text-left">
-                <div>
-                    <button type="button" class="inline-flex mt-8 w-full justify-center gap-x-1.5 rounded-md bg-[#171D25] px-3 py-2 text-sm font-semibold text-white shadow-sm ring-1 ring-inset ring-gray-300" id="menu-button" aria-expanded="false" aria-haspopup="true">
-                        Filtre
-                        <svg class="-mr-1 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
-                        </svg>
-                    </button>
-                </div>
-                <div class="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-[#171D25] shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none hidden" id="dropdown-menu" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
-                    <div class="py-1" role="none">
-                        <a href="#" class="text-white bg-[#171D25] block px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-0">Prix Croissant</a>
-                        <a href="#" class="text-white bg-[#171D25] block px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-1">Prix Décroissant</a>
-                        <a href="#" class="text-white bg-[#171D25] block px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-2">Ordre Alphabétique</a>
-                        <a href="#" class="text-white bg-[#171D25] block px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-3">Ordre Anti-Alphabétique</a>
+            <div class="w-full h-5/6 flex flex-wrap p-2 overflow-y-scroll justify-around">
+                {% for row in data %}
+                <a href="/game/{{ row['AppID'] }}" class="w-1/5 h-1/4 ml-2 mr-2 mb-2 mt-2 bg-[#171D25] rounded p-1">
+                    <div class="h-2/3 w-full bg-blue-500">
+                        <img src="{{row['Header image']}}" alt="image jeu" class="h-full w-full object-cover" />
                     </div>
-                </div>
+                    <div class="w-full h-1/3 flex">
+                        <div class="w-2/3 pl-2 flex items-center">
+                            <p class="text-white
+                                ">{%if row['Name']|length > 35
+                                %}{{row['Name'][:35]}}...{%else%}{{row['Name']}}{%endif%}</p>
+                        </div>
+                        <div class=" w-1/3 text-right pr-2 flex items-center justify-end">
+                            <p class="text-white
+
+                                ">{%if row['Price'] == 0 %}Free{%else%}{{row['Price']}}${%endif%}</p>
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
             </div>
-        </div>
+            <div class="w-full h-24 flex items-center justify-center">
+
+                {% if page > 1 %}
+                <button class="px-4 py-2 ml-2 mr-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                    id="previous">Précédent</button>
+                {% endif %}
+
+                <p class="text-white">Page
+                    <input type="number"
+                        class="w-10 h-8 rounded bg-[#171D25] text-white text-center focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        id="page-input" value="{{ page }}" />
+                    sur {{ total_pages }}
+                </p>
+
+                {% if page < total_pages %} <button
+                    class="px-4 py-2 ml-2 mr-2 bg-blue-500 text-white rounded hover:bg-blue-600" id="next">
+                    Suivant</button>
+                    {% endif %}
+
+            </div>
+        </article>
     </main>
 </body>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const menuButton = document.getElementById('menu-button');
-        const dropdownMenu = document.getElementById('dropdown-menu');
+    document.addEventListener('DOMContentLoaded', function () {
 
-        menuButton.addEventListener('click', function() {
-            const isExpanded = menuButton.getAttribute('aria-expanded') === 'true';
-            menuButton.setAttribute('aria-expanded', !isExpanded);
-            dropdownMenu.classList.toggle('hidden');
+        const sortSelect = document.getElementById('sort-select');
+
+        const gamesPerPage = document.getElementById('games-per-page');
+
+        const searchButton = document.getElementById('search');
+        const searchBar = document.getElementById('search-bar');
+
+        const prixTitle = document.getElementById('prix-title');
+        const prixContent = document.getElementById('prix-content');
+        const prixArrow = document.getElementById('prix-arrow');
+
+        const genreTitle = document.getElementById('genre-title');
+        const genreContent = document.getElementById('genre-content');
+        const genreArrow = document.getElementById('genre-arrow');
+
+        const tagTitle = document.getElementById('tag-title');
+        const tagContent = document.getElementById('tag-content');
+        const tagArrow = document.getElementById('tag-arrow');
+
+        const platformTitle = document.getElementById('platform-title');
+        const platformContent = document.getElementById('platform-content');
+        const platformArrow = document.getElementById('platform-arrow');
+
+        const categoryTitle = document.getElementById('category-title');
+        const categoryContent = document.getElementById('category-content');
+        const categoryArrow = document.getElementById('category-arrow');
+
+        const minPrice = document.getElementById('prix-min');
+        const maxPrice = document.getElementById('prix-max');
+
+        const genreCheckboxes = document.querySelectorAll('.genre');
+        const tagCheckboxes = document.querySelectorAll('.tag');
+        const platformCheckboxes = document.querySelectorAll('.platform');
+        const categoryCheckboxes = document.querySelectorAll('.category');
+
+        const applyButton = document.getElementById('apply');
+
+        const resetButton = document.getElementById('reset');
+
+        const pageInput = document.getElementById('page-input');
+        {% if page > 1 %}
+        const previousButton = document.getElementById('previous');
+        {% endif %}
+        {% if page < total_pages %}
+        const nextButton = document.getElementById('next');
+        {% endif %}
+
+        let sort = 'alpha-asc';
+        let search = '';
+        let genre = [];
+        let tag = [];
+        let platform = [];
+        let category = [];
+        let activePage = '{{ page }}'
+        let perPage = '{{ per_page }}'
+
+        const args = new URLSearchParams(window.location.search);
+
+        if (args.has('sort')) {
+            sort = args.get('sort');
+            sortSelect.value = sort;
+        }
+
+        if (args.has('per_page')) {
+            gamesPerPage.value = args.get('per_page');
+        }
+
+        if (args.has('search')) {
+            search = args.get('search');
+            searchBar.value = search;
+        }
+
+        if (args.has('min_price')) {
+            prixMin = args.get('min_price');
+            minPrice.value = prixMin;
+        }
+
+        if (args.has('max_price')) {
+            prixMax = args.get('max_price');
+            maxPrice.value = prixMax;
+        }
+
+        if (args.has('genre')) {
+            genre = args.getAll('genre');
+
+            genreCheckboxes.forEach(checkbox => {
+                if (genre.includes(checkbox.value)) {
+                    checkbox.checked = true;
+                }
+            });
+        }
+
+        if (args.has('tag')) {
+            tag = args.getAll('tag');
+
+            tagCheckboxes.forEach(checkbox => {
+                if (tag.includes(checkbox.value)) {
+                    checkbox.checked = true;
+                }
+            });
+        }
+
+        if (args.has('platform')) {
+            platform = args.getAll('platform');
+
+            platformCheckboxes.forEach(checkbox => {
+                if (platform.includes(checkbox.value)) {
+                    checkbox.checked = true;
+                }
+            });
+        }
+
+        if (args.has('category')) {
+            category = args.getAll('category');
+
+            categoryCheckboxes.forEach(checkbox => {
+                if (category.includes(checkbox.value)) {
+                    checkbox.checked = true;
+                }
+            });
+        }
+
+        sortSelect.addEventListener('change', function () {
+            console.log(sortSelect.value);
+
+            const url = new URL(window.location.href);
+            url.searchParams.set('sort', sortSelect.value);
+
+            url.searchParams.delete('page');
+
+            document.location = url;
         });
 
-        document.addEventListener('click', function(event) {
-            if (!menuButton.contains(event.target) && !dropdownMenu.contains(event.target)) {
-                dropdownMenu.classList.add('hidden');
-                menuButton.setAttribute('aria-expanded', 'false');
+        gamesPerPage.addEventListener('change', function () {
+            let value = gamesPerPage.value;
+
+            if (value !== perPage) {
+                let url = new URL(window.location.href);
+                url.searchParams.set('per_page', value);
+
+                document.location = url;
             }
         });
+
+        function doSearch() {
+            console.log('search');
+            console.log(searchBar.value);
+
+            const url = new URL(window.location.href);
+
+            if (searchBar.value === '') {
+                url.searchParams.delete('search');
+            } else {
+                url.searchParams.set('search', searchBar.value);
+            }
+
+            url.searchParams.delete('page');
+
+            document.location = url;
+        }
+
+        searchButton.addEventListener('click', function () {
+            doSearch();
+        });
+
+        searchBar.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter') {
+                doSearch();
+            }
+        });
+
+        prixTitle.addEventListener('click', function () {
+            prixContent.classList.toggle('hidden');
+            prixArrow.classList.toggle('rotate-180');
+        });
+
+        genreTitle.addEventListener('click', function () {
+            genreContent.classList.toggle('hidden');
+            genreArrow.classList.toggle('rotate-180');
+        });
+
+        tagTitle.addEventListener('click', function () {
+            tagContent.classList.toggle('hidden');
+            tagArrow.classList.toggle('rotate-180');
+        });
+
+        platformTitle.addEventListener('click', function () {
+            platformContent.classList.toggle('hidden');
+            platformArrow.classList.toggle('rotate-180');
+        });
+
+        categoryTitle.addEventListener('click', function () {
+            categoryContent.classList.toggle('hidden');
+            categoryArrow.classList.toggle('rotate-180');
+        });
+
+        applyButton.addEventListener('click', function () {
+            const minPriceValue = minPrice.value;
+            const maxPriceValue = maxPrice.value;
+            const genreValues = Array.from(genreCheckboxes).filter(checkbox => checkbox.checked).map(checkbox => checkbox.value);
+            const tagValues = Array.from(tagCheckboxes).filter(checkbox => checkbox.checked).map(checkbox => checkbox.value);
+            const platformValues = Array.from(platformCheckboxes).filter(checkbox => checkbox.checked).map(checkbox => checkbox.value);
+            const categoryValues = Array.from(categoryCheckboxes).filter(checkbox => checkbox.checked).map(checkbox => checkbox.value);
+
+            console.log(genreValues);
+            console.log(tagValues);
+            console.log(platformValues);
+            console.log(categoryValues);
+
+            let url = new URL(window.location.href)
+
+            url.searchParams.delete('genre');
+            url.searchParams.delete('tag');
+            url.searchParams.delete('platform');
+            url.searchParams.delete('category');
+
+            url.searchParams.set('min_price', minPriceValue);
+            url.searchParams.set('max_price', maxPriceValue);
+
+            genreValues.forEach(value => url.searchParams.append('genre', value));
+            tagValues.forEach(value => url.searchParams.append('tag', value));
+            platformValues.forEach(value => url.searchParams.append('platform', value));
+            categoryValues.forEach(value => url.searchParams.append('category', value));
+
+            document.location = url;
+        });
+
+        resetButton.addEventListener('click', function () {
+            genreCheckboxes.forEach(checkbox => checkbox.checked = false);
+            tagCheckboxes.forEach(checkbox => checkbox.checked = false);
+            platformCheckboxes.forEach(checkbox => checkbox.checked = false);
+            categoryCheckboxes.forEach(checkbox => checkbox.checked = false);
+
+            let url = new URL(window.location.href);
+
+            url.searchParams.delete('min_price');
+            url.searchParams.delete('max_price');
+
+            url.searchParams.delete('genre');
+            url.searchParams.delete('tag');
+            url.searchParams.delete('platform');
+            url.searchParams.delete('category');
+
+            document.location = url;
+        });
+
+
+        pageInput.addEventListener('focusout', function () {
+            let value = parseInt(pageInput.value);
+            if (value !== activePage) {
+                let url = new URL(window.location.href);
+                url.searchParams.set('page', value);
+                document.location = url;
+            }
+        });
+
+        pageInput.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter') {
+                let value = parseInt(pageInput.value);
+                if (value !== activePage) {
+                    let url = new URL(window.location.href);
+                    url.searchParams.set('page', value);
+                    document.location = url;
+                }
+            }
+        });
+
+        {% if page > 1 %}
+        previousButton.addEventListener('click', function () {
+            let url = new URL(window.location.href);
+            url.searchParams.set('page', parseInt(activePage) - 1);
+            document.location = url;
+        });
+        {% endif %}
+
+        {% if page < total_pages %}
+        nextButton.addEventListener('click', function () {
+            let url = new URL(window.location.href);
+            url.searchParams.set('page', parseInt(activePage) + 1);
+            document.location = url;
+        });
+        {% endif %}
+
     });
 </script>
+
 </html>
