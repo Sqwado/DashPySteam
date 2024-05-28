@@ -58,16 +58,16 @@
 
 <body class="w-screen h-screen bg-[#1B2838] overflow-x-hidden">
     <header class="w-screen h-1/6 bg-[#171D25] flex">
-        <a href="/" class="w-1/6 h-full flex items-center justify-center">
+        <a href="/" class="w-2/6 h-full flex items-center justify-left ml-8">
             <img src="{{ url_for('static', filename='images/logo_steam.png') }}" alt="logo steam" class="h-3/6" />
         </a>
-        <nav class="w-4/6 h-full flex items-center justify-center">
-            <input class="h-2/6 w-2/6 rounded p-2 text-white bg-[#1B2838]" placeholder="Recherchez le nom d'un jeu..."
+        <nav class="w-3/6 h-full flex items-center justify-center">
+            <input class="h-2/6 w-2/3 rounded p-2 text-white bg-[#1B2838]" placeholder="Recherchez le nom d'un jeu..."
                 type="text" id="search-bar" />
             <button class="h-2/6 rounded bg-[#1B2838] text-white ml-4 p-2 hover:bg-[#171D25]"
                 id="search">Rechercher</button>
         </nav>
-        <div class="w-1/6 h-full flex items-center justify-center">
+        <div class="w-1/6 h-full flex items-center justify-end">
             <div class="relative inline-block text-left">
                 <label for="sort-select" class="text-white">Trier par :</label>
                 <select
@@ -77,10 +77,14 @@
                     <option value="alpha-desc">Ordre Anti-Alphabétique</option>
                     <option value="price-asc">Prix Croissant</option>
                     <option value="price-desc">Prix Décroissant</option>
+                    <option value="metacritic-asc">MétaCritic Croissant</option>
+                    <option value="metacritic-desc">MétaCritic Décroissant</option>
                 </select>
             </div>
         </div>
-        <a href="/create">admin page</a>
+        <div class="w-24 h-full flex items-center justify-end mr-2">
+            <a href="/create" class="mr-4 text-white bg-blue-500 p-2 rounded text-center">Ajouter un jeu</a>
+        </div>
     </header>
 
     <main class="w-screen h-5/6 flex ">
@@ -105,6 +109,30 @@
                                 Max
                                 <input type="number" name="prix" value="{{ max_price }}" class="prix w-full text-black"
                                     min="0" id="prix-max" />
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="w-full flex items-center justify-center text-white mt-2">
+                <div class="w-5/6 p-2 m-4 rounded bg-[#1B2838]">
+                    <h3 class=" text-xl text-center cursor-pointer mb-2" id="metacritic-title">MétaCritic <img
+                            src="{{ url_for('static', filename='images/downarrow.svg') }}" alt="arrow"
+                            class=" h-4 w-4 inline ml-2" id="metacritic-arrow" /></h3>
+                    <div class="max-h-80 overflow-y-scroll content hidden" id="metacritic-content">
+                        <div class="flex flex-wrap justify-left bg-[#171D25] m-1 rounded">
+                            <label class="h-full m-1">
+                                Min
+                                <input type="number" name="metacritic" value="{{ min_metacritic }}"
+                                    class="metacritic w-full text-black" min="0" id="metacritic-min" />
+                            </label>
+                        </div>
+                        <div class="flex flex-wrap justify-left bg-[#171D25] m-1 rounded">
+                            <label class="h-full m-1">
+                                Max
+                                <input type="number" name="metacritic" value="{{ max_metacritic }}"
+                                    class="metacritic w-full text-black" min="0" id="metacritic-max" />
                             </label>
                         </div>
                     </div>
@@ -278,6 +306,10 @@
         const prixContent = document.getElementById('prix-content');
         const prixArrow = document.getElementById('prix-arrow');
 
+        const metacriticTitle = document.getElementById('metacritic-title');
+        const metacriticContent = document.getElementById('metacritic-content');
+        const metacriticArrow = document.getElementById('metacritic-arrow');
+
         const genreTitle = document.getElementById('genre-title');
         const genreContent = document.getElementById('genre-content');
         const genreArrow = document.getElementById('genre-arrow');
@@ -296,6 +328,9 @@
 
         const minPrice = document.getElementById('prix-min');
         const maxPrice = document.getElementById('prix-max');
+
+        const minMetacritic = document.getElementById('metacritic-min');
+        const maxMetacritic = document.getElementById('metacritic-max');
 
         const genreCheckboxes = document.querySelectorAll('.genre');
         const tagCheckboxes = document.querySelectorAll('.tag');
@@ -347,6 +382,16 @@
         if (args.has('max_price')) {
             prixMax = args.get('max_price');
             maxPrice.value = prixMax;
+        }
+
+        if (args.has('min_metacritic')) {
+            metacriticMin = args.get('min_metacritic');
+            minMetacritic.value = metacriticMin;
+        }
+
+        if (args.has('max_metacritic')) {
+            metacriticMax = args.get('max_metacritic');
+            maxMetacritic.value = metacriticMax;
         }
 
         if (args.has('genre')) {
@@ -443,6 +488,11 @@
             prixArrow.classList.toggle('rotate-180');
         });
 
+        metacriticTitle.addEventListener('click', function () {
+            metacriticContent.classList.toggle('hidden');
+            metacriticArrow.classList.toggle('rotate-180');
+        });
+
         genreTitle.addEventListener('click', function () {
             genreContent.classList.toggle('hidden');
             genreArrow.classList.toggle('rotate-180');
@@ -486,6 +536,9 @@
             url.searchParams.set('min_price', minPriceValue);
             url.searchParams.set('max_price', maxPriceValue);
 
+            url.searchParams.set('min_metacritic', minMetacritic.value);
+            url.searchParams.set('max_metacritic', maxMetacritic.value);
+
             genreValues.forEach(value => url.searchParams.append('genre', value));
             tagValues.forEach(value => url.searchParams.append('tag', value));
             platformValues.forEach(value => url.searchParams.append('platform', value));
@@ -504,6 +557,9 @@
 
             url.searchParams.delete('min_price');
             url.searchParams.delete('max_price');
+
+            url.searchParams.delete('min_metacritic');
+            url.searchParams.delete('max_metacritic');
 
             url.searchParams.delete('genre');
             url.searchParams.delete('tag');

@@ -1,7 +1,11 @@
 import pandas as pd
 import random
 import re
-df = pd.read_csv('games.csv', encoding = 'utf-8')
+
+filename = 'games.csv'
+# filename = 'testgame.csv'
+
+df = pd.read_csv(filename, encoding = 'utf-8')
 df = df.fillna('')
 # df = df[df['Name'] != '' & df['Price'] != '' & df['Header image'] != '']
 print(df.columns)
@@ -161,6 +165,16 @@ def order_by_price_reverse(df=df):
         return df
     return df.sort_values(by='Price', ascending=False)
 
+def order_by_metacritic(df=df):
+    if df.empty:
+        return df
+    return df.sort_values(by='Metacritic score')
+
+def order_by_metacritic_reverse(df=df):
+    if df.empty:
+        return df
+    return df.sort_values(by='Metacritic score', ascending=False)
+
 def write_categories():
     categories = get_all_categories()
     with open('filterdata/categories.txt', 'w') as f:
@@ -214,17 +228,87 @@ def get_games_by_price_range(min_price, max_price, df=df):
         if df['Price'][i] == '':
             continue
         price = df['Price'][i]
-        if price >= min_price and price <= max_price:
+        if price >= float(min_price) and price <= float(max_price):
+            games.append(df.iloc[i].to_dict())
+    return pd.DataFrame(games)
+
+def get_games_by_metacritic_range(min_metacritic, max_metacritic, df=df):
+    games = []
+    for i in range(len(df)):
+        if df['Metacritic score'][i] == '':
+            continue
+        metacritic = df['Metacritic score'][i]
+        if metacritic >= float(min_metacritic) and metacritic <= float(max_metacritic):
             games.append(df.iloc[i].to_dict())
     return pd.DataFrame(games)
 
 def get_min_price(df=df):
     df = order_by_price(df)
+    if df.empty:
+        return 0
     return df.head(1)['Price'].values[0]
 
 def get_max_price(df=df):
     df = order_by_price_reverse(df)
+    if df.empty:
+        return 0
     return df.head(1)['Price'].values[0]
+
+def get_min_metacritic(df=df):
+    df = order_by_metacritic(df)
+    if df.empty:
+        return 0
+    return df.head(1)['Metacritic score'].values[0]
+
+def get_max_metacritic(df=df):
+    df = order_by_metacritic_reverse(df)
+    if df.empty:
+        return 0
+    return df.head(1)['Metacritic score'].values[0]
+
+def get_new_appid():
+    while True:
+        appid = random.randint(0, 9999999)
+        if appid not in df['AppID'].values:
+            return appid
+        
+def add_game(name, price, metacritic_score, genres, categories, tags, windows, mac, linux, release_date, header_image):
+    global df
+    appid = get_new_appid()
+    new_game = pd.DataFrame([[appid, name, release_date, '', '', '', price, '', '', '', '', '', header_image, '', '', '', windows, mac, linux, metacritic_score, '', '', '', '', '', '', '', '', '', '', '', '', '', '', categories, genres, tags, '', '']], columns=df.columns)
+    df = df._append(new_game, ignore_index=True)
+    df.to_csv(filename, index=False, encoding='utf-8')
+    return appid
+
+def update_game(appid, name, price, metacritic_score, genres, categories, tags, windows, mac, linux, release_date, header_image):
+    global df
+    data = df[df['AppID'] == int(appid)]
+    if data.empty:
+        return False
+    index = data.index[0]
+    df.at[index, 'Name'] = name
+    df.at[index, 'Price'] = price
+    df.at[index, 'Metacritic score'] = metacritic_score
+    df.at[index, 'Genres'] = genres
+    df.at[index, 'Categories'] = categories
+    df.at[index, 'Tags'] = tags
+    df.at[index, 'Windows'] = windows
+    df.at[index, 'Mac'] = mac
+    df.at[index, 'Linux'] = linux
+    df.at[index, 'Release date'] = release_date
+    df.at[index, 'Header image'] = header_image
+    df.to_csv(filename, index=False, encoding='utf-8')
+    return True
+
+def delete_game(appid):
+    global df
+    data = df[df['AppID'] == int(appid)]
+    if data.empty:
+        return False
+    index = data.index[0]
+    df.drop(index, inplace=True)
+    df.to_csv(filename, index=False, encoding='utf-8')
+    return True
 
 # write_categories()
 # write_genres()
@@ -271,10 +355,15 @@ def get_max_price(df=df):
 
 df = get_data()
 
-# df = get_games_by_price_range(0, 10.11, df)
+df = get_games_by_price_range(0, 10.11, df)
 
-print(get_min_price(df))
-print(get_max_price(df))
+print(df)
+
+# print(get_min_price(df))
+# print(get_max_price(df))
 
 # print(df[['Name','Price']].sort_values(by='Price', ascending=False))
 
+# print(add_game('Test Game', 0.0, 0, 'Action', 'Single-player', 'Test', True, False, False, 'Nov 9, 2020', 'https://steamcdn-a.akamaihd.net/steam/apps/271590/header.jpg?t=1604933843'))
+# print(update_game(5960268, 'Test Game 2', 0.0, 0, 'Action', 'Single-player', 'Test', True, False, False, 'Nov 9, 2020', 'https://steamcdn-a.akamaihd.net/steam/apps/271590/header.jpg?t=1604933843'))
+# print(delete_game(5960268))

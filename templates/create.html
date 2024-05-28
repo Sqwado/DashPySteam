@@ -1,65 +1,79 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>create page</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
+
 <body class="w-screen h-screen bg-[#1B2838] overflow-x-hidden">
-<header class="w-screen h-1/6 bg-[#171D25] flex">
-    <a href="/" class="w-1/6 h-full flex items-center justify-center">
-        <img src="{{ url_for('static', filename='images/logo_steam.png') }}" alt="logo steam" class="h-3/6" />
-    </a>
-    <a href="/">page client</a>
-</header>
-<main>
-    <div class="flex flex-col items-center justify-center h-screen">
-        <div class="w-full max-w-md rounded-lg shadow-md p-6 bg-[#171D25]">
-            <h2 class="text-2xl font-bold text-white mb-4">Ajouter un jeu</h2>
+    <header class="w-screen h-1/6 bg-[#171D25] flex">
+        <a href="/" class="w-1/6 h-full flex items-center justify-center">
+            <img src="{{ url_for('static', filename='images/logo_steam.png') }}" alt="logo steam" class="h-3/6" />
+        </a>
+    </header>
+    <main class="w-screen h-5/6 flex items-center justify-center">
+        <div class="flex flex-col items-center justify-center">
+            <div class="w-full max-w-md rounded-lg shadow-md p-6 bg-[#171D25]">
+                <h2 class="text-2xl font-bold text-white mb-4">Ajouter un jeu</h2>
 
-            <form class="flex flex-col">
-                <input type="text" class="bg-gray-100 text-gray-900 border-0 rounded-md p-2 mb-4 focus:bg-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150" placeholder="Nom du jeu">
-                <input type="text" class="bg-gray-100 text-gray-900 border-0 rounded-md p-2 mb-4 focus:bg-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150" placeholder="Description du jeu">
-                <label>
-                    <select class="bg-gray-100 text-gray-900 border-0 rounded-md p-2 mb-4 focus:bg-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150">
-                        <option value="Genre1">Genre1</option>
-                        <option value="Genre2">Genre2</option>
-                        <option value="Genre3">Genre3</option>
-                        <option value="Genre4">Genre4</option>
-                        <option value="Genre5">Genre5</option>
-                        <option value="Genre6">Genre6</option>
-                        <option value="Genre7">Genre7</option>
-                    </select>
-                </label>
-                <label>
-                    <select class="bg-gray-100 text-gray-900 border-0 rounded-md p-2 mb-4 focus:bg-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150">
-                        <option value="Categorie1">Categorie1</option>
-                        <option value="Categorie2">Categorie2</option>
-                        <option value="Categorie3">Categorie3</option>
-                        <option value="Categorie4">Categorie4</option>
-                        <option value="Categorie5">Categorie5</option>
-                        <option value="Categorie6">Categorie6</option>
-                        <option value="Categorie7">Categorie7</option>
-                    </select>
-                </label><label>
-                    <select class="bg-gray-100 text-gray-900 border-0 rounded-md p-2 mb-4 focus:bg-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150">
-                        <option value="Tags1">Tags1</option>
-                        <option value="Tags2">Tags2</option>
-                        <option value="Tags3">Tags3</option>
-                        <option value="Tags4">Tags4</option>
-                        <option value="Tags5">Tags5</option>
-                        <option value="Tags6">Tags6</option>
-                        <option value="Tags7">Tags7</option>
-                    </select>
-                </label>
-                <input type="number" class="bg-gray-100 text-gray-900 border-0 rounded-md p-2 mb-4 focus:bg-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150" placeholder="Prix">
-                <input type="file" class="bg-gray-100 text-gray-900 border-0 rounded-md p-2 mb-4 focus:bg-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150" placeholder="Resume">
+                <form class="flex flex-col">
+                    <input type="text"
+                        class="bg-gray-100 text-gray-900 border-0 rounded-md p-2 mb-4 focus:bg-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150"
+                        placeholder="Nom du jeu">
+                    <input type="text"
+                        class="bg-gray-100 text-gray-900 border-0 rounded-md p-2 mb-4 focus:bg-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150"
+                        placeholder="Description du jeu">
+                    <label>
+                        <select
+                            class="bg-gray-100 text-gray-900 border-0 rounded-md p-2 mb-4 focus:bg-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150">
+                            <option value="Genre1">Genre1</option>
+                            <option value="Genre2">Genre2</option>
+                            <option value="Genre3">Genre3</option>
+                            <option value="Genre4">Genre4</option>
+                            <option value="Genre5">Genre5</option>
+                            <option value="Genre6">Genre6</option>
+                            <option value="Genre7">Genre7</option>
+                        </select>
+                    </label>
+                    <label>
+                        <select
+                            class="bg-gray-100 text-gray-900 border-0 rounded-md p-2 mb-4 focus:bg-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150">
+                            <option value="Categorie1">Categorie1</option>
+                            <option value="Categorie2">Categorie2</option>
+                            <option value="Categorie3">Categorie3</option>
+                            <option value="Categorie4">Categorie4</option>
+                            <option value="Categorie5">Categorie5</option>
+                            <option value="Categorie6">Categorie6</option>
+                            <option value="Categorie7">Categorie7</option>
+                        </select>
+                    </label><label>
+                        <select
+                            class="bg-gray-100 text-gray-900 border-0 rounded-md p-2 mb-4 focus:bg-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150">
+                            <option value="Tags1">Tags1</option>
+                            <option value="Tags2">Tags2</option>
+                            <option value="Tags3">Tags3</option>
+                            <option value="Tags4">Tags4</option>
+                            <option value="Tags5">Tags5</option>
+                            <option value="Tags6">Tags6</option>
+                            <option value="Tags7">Tags7</option>
+                        </select>
+                    </label>
+                    <input type="number"
+                        class="bg-gray-100 text-gray-900 border-0 rounded-md p-2 mb-4 focus:bg-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150"
+                        placeholder="Prix">
+                    <input type="file"
+                        class="bg-gray-100 text-gray-900 border-0 rounded-md p-2 mb-4 focus:bg-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150"
+                        placeholder="Resume">
 
-                <button type="submit" class="bg-gradient-to-r from-indigo-500 to-blue-500 text-white font-bold py-2 px-4 rounded-md mt-4 hover:bg-indigo-600 hover:to-blue-600 transition ease-in-out duration-150">Apply</button>
-            </form>
+                    <button type="submit"
+                        class="bg-gradient-to-r from-indigo-500 to-blue-500 text-white font-bold py-2 px-4 rounded-md mt-4 hover:bg-indigo-600 hover:to-blue-600 transition ease-in-out duration-150">Apply</button>
+                </form>
+            </div>
         </div>
-    </div>
 
-</main>
+    </main>
 </body>
+
 </html>

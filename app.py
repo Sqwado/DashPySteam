@@ -4,7 +4,10 @@ import random
 
 app = Flask(__name__)
 
-df = pd.read_csv('games.csv', encoding = 'utf-8')
+# filename = 'games.csv'
+filename = 'testgame.csv'
+
+df = pd.read_csv(filename, encoding = 'utf-8')
 df = df.fillna('')
 # df = df[df['Name'] != '' & df['Price'] != '' & df['Header image'] != '']
 
@@ -161,6 +164,16 @@ def order_by_price_reverse(df=df):
         return df
     return df.sort_values(by='Price', ascending=False)
 
+def order_by_metacritic(df=df):
+    if df.empty:
+        return df
+    return df.sort_values(by='Metacritic score')
+
+def order_by_metacritic_reverse(df=df):
+    if df.empty:
+        return df
+    return df.sort_values(by='Metacritic score', ascending=False)
+
 def write_categories():
     categories = get_all_categories()
     with open('filterdata/categories.txt', 'w') as f:
@@ -213,18 +226,88 @@ def get_games_by_price_range(min_price, max_price, df=df):
     for i in range(len(df)):
         if df['Price'][i] == '':
             continue
-        price = float(df['Price'][i])
+        price = df['Price'][i]
         if price >= float(min_price) and price <= float(max_price):
+            games.append(df.iloc[i].to_dict())
+    return pd.DataFrame(games)
+
+def get_games_by_metacritic_range(min_metacritic, max_metacritic, df=df):
+    games = []
+    for i in range(len(df)):
+        if df['Metacritic score'][i] == '':
+            continue
+        metacritic = df['Metacritic score'][i]
+        if metacritic >= float(min_metacritic) and metacritic <= float(max_metacritic):
             games.append(df.iloc[i].to_dict())
     return pd.DataFrame(games)
 
 def get_min_price(df=df):
     df = order_by_price(df)
+    if df.empty:
+        return 0
     return df.head(1)['Price'].values[0]
 
 def get_max_price(df=df):
     df = order_by_price_reverse(df)
+    if df.empty:
+        return 0
     return df.head(1)['Price'].values[0]
+
+def get_min_metacritic(df=df):
+    df = order_by_metacritic(df)
+    if df.empty:
+        return 0
+    return df.head(1)['Metacritic score'].values[0]
+
+def get_max_metacritic(df=df):
+    df = order_by_metacritic_reverse(df)
+    if df.empty:
+        return 0
+    return df.head(1)['Metacritic score'].values[0]
+
+def get_new_appid():
+    while True:
+        appid = random.randint(0, 9999999)
+        if appid not in df['AppID'].values:
+            return appid
+        
+def add_game(name, price, metacritic_score, genres, categories, tags, windows, mac, linux, release_date, header_image):
+    global df
+    appid = get_new_appid()
+    new_game = pd.DataFrame([[appid, name, release_date, '', '', '', price, '', '', '', '', '', header_image, '', '', '', windows, mac, linux, metacritic_score, '', '', '', '', '', '', '', '', '', '', '', '', '', '', categories, genres, tags, '', '']], columns=df.columns)
+    df = df._append(new_game, ignore_index=True)
+    df.to_csv(filename, index=False, encoding='utf-8')
+    return appid
+
+def update_game(appid, name, price, metacritic_score, genres, categories, tags, windows, mac, linux, release_date, header_image):
+    global df
+    data = df[df['AppID'] == int(appid)]
+    if data.empty:
+        return False
+    index = data.index[0]
+    df.at[index, 'Name'] = name
+    df.at[index, 'Price'] = price
+    df.at[index, 'Metacritic score'] = metacritic_score
+    df.at[index, 'Genres'] = genres
+    df.at[index, 'Categories'] = categories
+    df.at[index, 'Tags'] = tags
+    df.at[index, 'Windows'] = windows
+    df.at[index, 'Mac'] = mac
+    df.at[index, 'Linux'] = linux
+    df.at[index, 'Release date'] = release_date
+    df.at[index, 'Header image'] = header_image
+    df.to_csv(filename, index=False, encoding='utf-8')
+    return True
+
+def delete_game(appid):
+    global df
+    data = df[df['AppID'] == int(appid)]
+    if data.empty:
+        return False
+    index = data.index[0]
+    df.drop(index, inplace=True)
+    df.to_csv(filename, index=False, encoding='utf-8')
+    return True
 
 @app.route('/')
 def home():
@@ -293,6 +376,22 @@ def home():
         
     df = get_games_by_price_range(min_price, max_price, df)
         
+    if 'min_metacritic' in args:
+        print('min_metacritic')
+        print(args['min_metacritic'])
+        min_metacritic = args['min_metacritic']
+    else:
+        min_metacritic = 0
+    
+    if 'max_metacritic' in args:
+        print('max_metacritic')
+        print(args['max_metacritic'])
+        max_metacritic = args['max_metacritic']
+    else:
+        max_metacritic = 100
+        
+    df = get_games_by_metacritic_range(min_metacritic, max_metacritic, df)
+        
     if 'sort' in args:
         if args['sort'] == 'price-asc':
             print('price-asc')
@@ -300,6 +399,12 @@ def home():
         elif args['sort'] == 'price-desc':
             print('price-desc')
             df = order_by_price_reverse(df)
+        elif args['sort'] == 'metacritic-asc':
+            print('metacritic-asc')
+            df = order_by_metacritic(df)
+        elif args['sort'] == 'metacritic-desc':
+            print('metacritic-desc')
+            df = order_by_metacritic_reverse(df)
         elif args['sort'] == 'alpha-desc':
             print('alpha-desc')
             df = order_by_alphabetical_reverse(df)
@@ -313,6 +418,9 @@ def home():
     
     min_price = get_min_price(df)
     max_price = get_max_price(df)
+    
+    min_metacritic = get_min_metacritic(df)
+    max_metacritic = get_max_metacritic(df)
 
     df = get_data_page(page, per_page, df)
     
@@ -327,7 +435,7 @@ def home():
     
     total_pages = total_games // per_page + 1
     
-    return render_template('index.html', data=data, tag=tag, genre=genre, platform=platform, category=category, page=page, per_page=per_page, total_pages=total_pages, total_games=total_games, min_price=min_price, max_price=max_price)
+    return render_template('index.html', data=data, tag=tag, genre=genre, platform=platform, category=category, page=page, per_page=per_page, total_pages=total_pages, total_games=total_games, min_price=min_price, max_price=max_price, min_metacritic=min_metacritic, max_metacritic=max_metacritic)
 
 @app.route('/game/<appid>')
 def game(appid):
@@ -341,14 +449,37 @@ def game(appid):
 
 @app.route('/create')
 def create():
+    
+    args = request.args
+    
+    tag = get_tags()
+    genre = get_genres()
+    platform = get_platforms()
+    category = get_categories()
 
     return render_template('create.html')
 
 
-@app.route('/edit')
-def edit():
+@app.route('/edit/<appid>')
+def edit(appid):
+    
+    game = get_game_by_id(appid)
+    
+    if game is None:
+        return redirect(url_for('home'))
+    
+    tag = get_tags()
+    genre = get_genres()
+    platform = get_platforms()
+    category = get_categories()
+    
+    return render_template('edit.html', data=game, tag=tag, genre=genre, platform=platform, category=category)
 
-    return render_template('edit.html')
+@app.route('/delete/<appid>')
+def delete(appid):
+    if delete_game(appid):
+        return redirect(url_for('home'))
+    return redirect(url_for('game', appid=appid))
 
 if __name__ == '__main__':
     app.run(debug=True)
