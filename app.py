@@ -340,13 +340,13 @@ def game(appid):
     return render_template('game.html', data=game)
 
 @app.route('/create')
-def admin():
+def create():
 
     return render_template('create.html')
 
 
 @app.route('/edit')
-def admin():
+def edit():
 
     return render_template('edit.html')
 
