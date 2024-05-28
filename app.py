@@ -339,5 +339,16 @@ def game(appid):
     
     return render_template('game.html', data=game)
 
+@app.route('/create')
+def admin():
+
+    return render_template('create.html')
+
+
+@app.route('/edit')
+def admin():
+
+    return render_template('edit.html')
+
 if __name__ == '__main__':
     app.run(debug=True)
