@@ -58,8 +58,9 @@
 
 <body class="w-screen h-screen bg-[#1B2838] overflow-x-hidden">
     <header class="w-screen h-1/6 bg-[#171D25] flex">
-        <a href="/" class="w-2/6 h-full flex items-center justify-left ml-8">
-            <img src="{{ url_for('static', filename='images/logo_steam.png') }}" alt="logo steam" class="h-3/6" />
+        <a href="/" class="w-96 h-full flex items-center justify-center">
+            <img src="{{ url_for('static', filename='images/logo_steam.png') }}" alt="logo steam"
+                class=" fit-cover p-4" />
         </a>
         <nav class="w-3/6 h-full flex items-center justify-center">
             <input class="h-2/6 w-2/3 rounded p-2 text-white bg-[#1B2838]" placeholder="Recherchez le nom d'un jeu..."

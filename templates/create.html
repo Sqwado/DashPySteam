@@ -3,77 +3,223 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>create page</title>
+    <title>Create page</title>
     <script src="https://cdn.tailwindcss.com"></script>
+
 </head>
 
 <body class="w-screen h-screen bg-[#1B2838] overflow-x-hidden">
     <header class="w-screen h-1/6 bg-[#171D25] flex">
-        <a href="/" class="w-1/6 h-full flex items-center justify-center">
-            <img src="{{ url_for('static', filename='images/logo_steam.png') }}" alt="logo steam" class="h-3/6" />
+        <a href="/" class="w-96 h-full flex items-center justify-center">
+            <img src="{{ url_for('static', filename='images/logo_steam.png') }}" alt="logo steam"
+                class=" fit-cover p-4" />
         </a>
     </header>
-    <main class="w-screen h-5/6 flex items-center justify-center">
-        <div class="flex flex-col items-center justify-center">
-            <div class="w-full max-w-md rounded-lg shadow-md p-6 bg-[#171D25]">
+    <main class="w-screen h-5/6 flex justify-center">
+        <div class="flex flex-col fixed left-0 top-1/6 w-1/6">
+            <a href="javascript:history.back()">
+                <img src="{{ url_for('static', filename='images/back-arrow.svg') }}" alt="back arrow"
+                    class="fit-cover w-20" />
+            </a>
+        </div>
+        <div class="w-96 overflow-y-scroll m-4 rounded">
+            <div class="w-full rounded-lg shadow-md p-6 bg-[#171D25]">
                 <h2 class="text-2xl font-bold text-white mb-4">Ajouter un jeu</h2>
 
                 <form class="flex flex-col">
-                    <input type="text"
-                        class="bg-gray-100 text-gray-900 border-0 rounded-md p-2 mb-4 focus:bg-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150"
-                        placeholder="Nom du jeu">
-                    <input type="text"
-                        class="bg-gray-100 text-gray-900 border-0 rounded-md p-2 mb-4 focus:bg-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150"
-                        placeholder="Description du jeu">
-                    <label>
-                        <select
-                            class="bg-gray-100 text-gray-900 border-0 rounded-md p-2 mb-4 focus:bg-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150">
-                            <option value="Genre1">Genre1</option>
-                            <option value="Genre2">Genre2</option>
-                            <option value="Genre3">Genre3</option>
-                            <option value="Genre4">Genre4</option>
-                            <option value="Genre5">Genre5</option>
-                            <option value="Genre6">Genre6</option>
-                            <option value="Genre7">Genre7</option>
-                        </select>
-                    </label>
-                    <label>
-                        <select
-                            class="bg-gray-100 text-gray-900 border-0 rounded-md p-2 mb-4 focus:bg-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150">
-                            <option value="Categorie1">Categorie1</option>
-                            <option value="Categorie2">Categorie2</option>
-                            <option value="Categorie3">Categorie3</option>
-                            <option value="Categorie4">Categorie4</option>
-                            <option value="Categorie5">Categorie5</option>
-                            <option value="Categorie6">Categorie6</option>
-                            <option value="Categorie7">Categorie7</option>
-                        </select>
-                    </label><label>
-                        <select
-                            class="bg-gray-100 text-gray-900 border-0 rounded-md p-2 mb-4 focus:bg-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150">
-                            <option value="Tags1">Tags1</option>
-                            <option value="Tags2">Tags2</option>
-                            <option value="Tags3">Tags3</option>
-                            <option value="Tags4">Tags4</option>
-                            <option value="Tags5">Tags5</option>
-                            <option value="Tags6">Tags6</option>
-                            <option value="Tags7">Tags7</option>
-                        </select>
-                    </label>
-                    <input type="number"
-                        class="bg-gray-100 text-gray-900 border-0 rounded-md p-2 mb-4 focus:bg-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150"
-                        placeholder="Prix">
-                    <input type="file"
-                        class="bg-gray-100 text-gray-900 border-0 rounded-md p-2 mb-4 focus:bg-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150"
-                        placeholder="Resume">
+                    <div class="flex flex-col">
+                        <label for="name" class="text-white">Nom du jeu</label>
+                        <input type="text"
+                            class="bg-gray-100 text-gray-900 border-0 rounded-md p-2 mb-4 focus:bg-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150"
+                            placeholder="Nom du jeu" name="name">
+                    </div>
+                    <div class="flex flex-col">
+                        <lab for="price" class="text-white">Prix</lab>
+                        <input type="number"
+                            class="bg-gray-100 text-gray-900 border-0 rounded-md p-2 mb-4 focus:bg-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150"
+                            placeholder="Prix" name="price" step="0.01" min="0" max="1000">
+                    </div>
+                    <div class="flex flex-col">
+                        <label for="metacritic_score" class="text-white">Metacritic</label>
+                        <input type="number"
+                            class="bg-gray-100 text-gray-900 border-0 rounded-md p-2 mb-4 focus:bg-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150"
+                            placeholder="Metacritic" name="metacritic_score" step="1" min="0" max="100">
+                    </div>
+                    <div class="w-full flex items-center justify-center text-white mt-2">
+                        <div class="w-5/6 p-2 m-4 rounded bg-[#1B2838]">
+                            <h3 class=" text-xl text-center cursor-pointer mb-2" id="genre-title">Genre <img
+                                    src="{{ url_for('static', filename='images/downarrow.svg') }}" alt="arrow"
+                                    class=" h-4 w-4 inline ml-2" id="genre-arrow" /></h3>
+                            <div class="max-h-80 overflow-y-scroll content hidden" id="genre-content">
+                                {% for row in genre %}
+                                <div class="flex flex-wrap justify-left bg-[#171D25] m-1 rounded">
+                                    <label class="h-full m-1">
+
+                                        <input type="checkbox" name="genre" value="{{ row }}" class="genre" />
+                                        {{ row }}
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="w-full flex items-center justify-center text-white mt-2">
+                        <div class="w-5/6 p-2 m-4 rounded bg-[#1B2838]">
+                            <h3 class=" text-xl text-center cursor-pointer mb-2" id="tag-title">Tags <img
+                                    src="{{ url_for('static', filename='images/downarrow.svg') }}" alt="arrow"
+                                    class=" h-4 w-4 inline ml-2" id="tag-arrow" /></h3>
+                            <div class="max-h-80 overflow-y-scroll content hidden" id="tag-content">
+                                {% for row in tag %}
+                                <div class="flex flex-wrap justify-left bg-[#171D25] m-1 rounded">
+                                    <label class="h-full m-1">
+
+                                        <input type="checkbox" name="tag" value="{{ row }}" class="tag" />
+                                        {{ row }}
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="w-full flex items-center justify-center text-white mt-2">
+                        <div class="w-5/6 p-2 m-4 rounded bg-[#1B2838]">
+                            <h3 class=" text-xl text-center cursor-pointer mb-2" id="platform-title">Plateforme <img
+                                    src="{{ url_for('static', filename='images/downarrow.svg') }}" alt="arrow"
+                                    class=" h-4 w-4 inline ml-2" id="platform-arrow" /></h3>
+                            <div class="max-h-80 overflow-y-scroll content hidden" id="platform-content">
+                                {% for row in platform %}
+                                <div class="flex flex-wrap justify-left bg-[#171D25] m-1 rounded">
+                                    <label class="h-full m-1">
+
+                                        <input type="checkbox" name="platform" value="{{ row }}" class="platform" />
+                                        {{ row }}
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="w-full flex items-center justify-center text-white mt-2">
+                        <div class="w-5/6 p-2 m-4 rounded bg-[#1B2838]">
+                            <h3 class=" text-xl text-center cursor-pointer mb-2" id="category-title">Gategory <img
+                                    src="{{ url_for('static', filename='images/downarrow.svg') }}" alt="arrow"
+                                    class=" h-4 w-4 inline ml-2" id="category-arrow" /></h3>
+                            <div class="max-h-80 overflow-y-scroll content hidden" id="category-content">
+                                {% for row in category %}
+                                <div class="flex flex-wrap justify-left bg-[#171D25] m-1 rounded">
+                                    <label class="h-full m-1">
+                                        <input type="checkbox" name="category" value="{{ row }}" class="category" />
+                                        {{ row }}
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-center justify-center w-full">
+                        <label for="release_date" class="text-white">Date de publication</label>
+                        <input type="date"
+                            class="bg-gray-100 text-gray-900 border-0 rounded-md p-2 mb-4 focus:bg-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150"
+                            placeholder="Date de publication" value="{{ date }}" name="release_date" id="date">
+                    </div>
+                    <div class="flex flex-col">
+                        <label for="header_image" class="text-white">Lien de l'image d'en-tête</label>
+                        <input type="text"
+                            class="bg-gray-100 text-gray-900 border-0 rounded-md p-2 mb-4 focus:bg-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500 transition ease-in-out duration-150"
+                            placeholder="Lien de l'image d'en-tête" value="" name="header_image"
+                            id="header-image-input">
+                        <div class="w-full h-40">
+                            <img src="" alt="image jeu" class="h-full w-full fit-cover" id="header-image" />
+                        </div>
+                    </div>
 
                     <button type="submit"
-                        class="bg-gradient-to-r from-indigo-500 to-blue-500 text-white font-bold py-2 px-4 rounded-md mt-4 hover:bg-indigo-600 hover:to-blue-600 transition ease-in-out duration-150">Apply</button>
+                        class="bg-gradient-to-r from-indigo-500 to-blue-500 text-white font-bold py-2 px-4 rounded-md mt-4 hover:bg-indigo-600 hover:to-blue-600 transition ease-in-out duration-150"
+                        id="apply">Créer</button>
                 </form>
             </div>
         </div>
 
     </main>
 </body>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+        const genreTitle = document.getElementById('genre-title');
+        const genreContent = document.getElementById('genre-content');
+        const genreArrow = document.getElementById('genre-arrow');
+
+        const tagTitle = document.getElementById('tag-title');
+        const tagContent = document.getElementById('tag-content');
+        const tagArrow = document.getElementById('tag-arrow');
+
+        const platformTitle = document.getElementById('platform-title');
+        const platformContent = document.getElementById('platform-content');
+        const platformArrow = document.getElementById('platform-arrow');
+
+        const categoryTitle = document.getElementById('category-title');
+        const categoryContent = document.getElementById('category-content');
+        const categoryArrow = document.getElementById('category-arrow');
+
+        const headerImageInput = document.getElementById('header-image-input');
+        const headerImage = document.getElementById('header-image');
+
+        const genreCheckboxes = document.querySelectorAll('.genre');
+        const tagCheckboxes = document.querySelectorAll('.tag');
+        const platformCheckboxes = document.querySelectorAll('.platform');
+        const categoryCheckboxes = document.querySelectorAll('.category');
+
+
+
+
+        genreTitle.addEventListener('click', function () {
+            genreContent.classList.toggle('hidden');
+            genreArrow.classList.toggle('rotate-180');
+        });
+
+        tagTitle.addEventListener('click', function () {
+            tagContent.classList.toggle('hidden');
+            tagArrow.classList.toggle('rotate-180');
+        });
+
+        platformTitle.addEventListener('click', function () {
+            platformContent.classList.toggle('hidden');
+            platformArrow.classList.toggle('rotate-180');
+        });
+
+        categoryTitle.addEventListener('click', function () {
+            categoryContent.classList.toggle('hidden');
+            categoryArrow.classList.toggle('rotate-180');
+        });
+
+
+        headerImageInput.addEventListener('input', function () {
+            headerImage.src = headerImageInput.value;
+        });
+
+        headerImageInput.addEventListener('change', function () {
+            headerImage.src = headerImageInput.value;
+        });
+
+        const applyButton = document.getElementById('apply');
+
+        applyButton.addEventListener('click', function () {
+            const genreValues = Array.from(genreCheckboxes).filter(checkbox => checkbox.checked).map(checkbox => checkbox.value);
+            const tagValues = Array.from(tagCheckboxes).filter(checkbox => checkbox.checked).map(checkbox => checkbox.value);
+            const platformValues = Array.from(platformCheckboxes).filter(checkbox => checkbox.checked).map(checkbox => checkbox.value);
+            const categoryValues = Array.from(categoryCheckboxes).filter(checkbox => checkbox.checked).map(checkbox => checkbox.value);
+
+            console.log(genreValues);
+            console.log(tagValues);
+            console.log(platformValues);
+            console.log(categoryValues);
+        });
+    });
+
+
+</script>
 
 </html>

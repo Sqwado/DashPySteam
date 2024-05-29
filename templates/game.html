@@ -34,12 +34,19 @@
             <img src="{{ url_for('static', filename='images/logo_steam.png') }}" alt="logo steam" class="h-3/6" />
         </a>
 
-        <a href="/edit/{{data['AppID']}}" class="mr-4 text-white bg-blue-500 p-2 rounded">Edit</a>
+        <div>
+            <a href="/edit/{{data['AppID']}}" class="mr-4 text-white bg-blue-500 p-2 rounded">Edit</a>
+            <a href="/delete/{{data['AppID']}}" class="mr-4 text-white bg-red-500 p-2 rounded">Delete</a>
+        </div>
     </header>
 
     <main class="w-screen h-5/6 flex ">
-        <button
-            class="bg-red-500 p-2 rounded text-white w-32 h-12 absolute right-10 top-40 opacity-20 hover:opacity-100">Delete</button>
+        <div class="flex flex-col fixed left-0 top-1/6 w-1/6">
+            <a href="javascript:history.back()">
+                <img src="{{ url_for('static', filename='images/back-arrow.svg') }}" alt="back arrow"
+                    class="fit-cover w-20" />
+            </a>
+        </div>
         <article class="w-full flex flex-wrap p-2 overflow-y-scroll justify-around">
             <div class="h-2/3 w-full bg-blue-500">
                 <img src="{{data['Header image']}}" alt="image jeu" class="h-full w-full object-cover" />
@@ -59,91 +66,6 @@
 </body>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-
-        let sort = 'alpha-asc';
-        let search = '';
-        let genre = [];
-        let tag = [];
-        let platform = [];
-        let category = [];
-
-        const sortSelect = document.getElementById('sort-select');
-
-        sortSelect.addEventListener('change', function () {
-            console.log(sortSelect.value);
-        });
-
-        const searchButton = document.getElementById('search');
-        const searchBar = document.getElementById('search-bar');
-
-        searchButton.addEventListener('click', function () {
-            console.log('search');
-            console.log(searchBar.value);
-        });
-
-        const genreTitle = document.getElementById('genre-title');
-        const genreContent = document.getElementById('genre-content');
-        const genreArrow = document.getElementById('genre-arrow');
-
-        genreTitle.addEventListener('click', function () {
-            genreContent.classList.toggle('hidden');
-            genreArrow.classList.toggle('rotate-180');
-        });
-
-        const tagTitle = document.getElementById('tag-title');
-        const tagContent = document.getElementById('tag-content');
-        const tagArrow = document.getElementById('tag-arrow');
-
-        tagTitle.addEventListener('click', function () {
-            tagContent.classList.toggle('hidden');
-            tagArrow.classList.toggle('rotate-180');
-        });
-
-        const platformTitle = document.getElementById('platform-title');
-        const platformContent = document.getElementById('platform-content');
-        const platformArrow = document.getElementById('platform-arrow');
-
-        platformTitle.addEventListener('click', function () {
-            platformContent.classList.toggle('hidden');
-            platformArrow.classList.toggle('rotate-180');
-        });
-
-        const categoryTitle = document.getElementById('category-title');
-        const categoryContent = document.getElementById('category-content');
-        const categoryArrow = document.getElementById('category-arrow');
-
-        categoryTitle.addEventListener('click', function () {
-            categoryContent.classList.toggle('hidden');
-            categoryArrow.classList.toggle('rotate-180');
-        });
-
-        const genreCheckboxes = document.querySelectorAll('.genre');
-        const tagCheckboxes = document.querySelectorAll('.tag');
-        const platformCheckboxes = document.querySelectorAll('.platform');
-        const categoryCheckboxes = document.querySelectorAll('.category');
-
-        const applyButton = document.getElementById('apply');
-
-        applyButton.addEventListener('click', function () {
-            const genreValues = Array.from(genreCheckboxes).filter(checkbox => checkbox.checked).map(checkbox => checkbox.value);
-            const tagValues = Array.from(tagCheckboxes).filter(checkbox => checkbox.checked).map(checkbox => checkbox.value);
-            const platformValues = Array.from(platformCheckboxes).filter(checkbox => checkbox.checked).map(checkbox => checkbox.value);
-            const categoryValues = Array.from(categoryCheckboxes).filter(checkbox => checkbox.checked).map(checkbox => checkbox.value);
-
-            console.log(genreValues);
-            console.log(tagValues);
-            console.log(platformValues);
-            console.log(categoryValues);
-        });
-
-        const resetButton = document.getElementById('reset');
-
-        resetButton.addEventListener('click', function () {
-            genreCheckboxes.forEach(checkbox => checkbox.checked = false);
-            tagCheckboxes.forEach(checkbox => checkbox.checked = false);
-            platformCheckboxes.forEach(checkbox => checkbox.checked = false);
-            categoryCheckboxes.forEach(checkbox => checkbox.checked = false);
-        });
 
     });
 </script>

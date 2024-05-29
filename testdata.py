@@ -12,6 +12,11 @@ print(df.columns)
 # print(df[['AppID','Name','Price','Metacritic score','Genres','Categories','Windows','Mac','Linux']].sort_values(by='Notes', ascending=False).head(10))
 # print(df[['Name','Price','Metacritic score']].sort_values(by='Metacritic score', ascending=False).head(10))
 
+def set_data():
+    global df
+    df = pd.read_csv(filename, encoding = 'utf-8')
+    df = df.fillna('')
+
 def get_data():
     return df
 
@@ -34,6 +39,15 @@ def to_date(datein):
         date = '0' + date
     month = month_dict[month]
     return f"{date}/{month}/{year}"
+
+def date_to_string(datein):
+    month_dict = {'Jan': '01', 'Feb': '02', 'Mar': '03', 'Apr': '04', 'May': '05', 'Jun': '06', 'Jul': '07', 'Aug': '08', 'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dec': '12'}
+    datein = datein.split('/')
+    date = datein[0]
+    month = datein[1]
+    year = datein[2]
+    month = list(month_dict.keys())[list(month_dict.values()).index(month)]
+    return f"{month} {date}, {year}"
 
 def get_all_categories():
     categories = df['Categories']

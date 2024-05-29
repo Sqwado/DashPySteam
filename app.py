@@ -4,12 +4,17 @@ import random
 
 app = Flask(__name__)
 
-# filename = 'games.csv'
-filename = 'testgame.csv'
+filename = 'games.csv'
+# filename = 'testgame.csv'
 
 df = pd.read_csv(filename, encoding = 'utf-8')
 df = df.fillna('')
 # df = df[df['Name'] != '' & df['Price'] != '' & df['Header image'] != '']
+
+def set_data():
+    global df
+    df = pd.read_csv(filename, encoding = 'utf-8')
+    df = df.fillna('')
 
 def get_data():
     return df
@@ -17,7 +22,6 @@ def get_data():
 def to_date(datein):
     if type(datein) != str:
         return datein
-    print(datein)
     month_dict = {'Jan': '01', 'Feb': '02', 'Mar': '03', 'Apr': '04', 'May': '05', 'Jun': '06', 'Jul': '07', 'Aug': '08', 'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dec': '12'}
     datein = datein.replace(',', '')
     datein = datein.split(' ')
@@ -32,7 +36,15 @@ def to_date(datein):
     if len(date) == 1:
         date = '0' + date
     month = month_dict[month]
-    return f"{date}/{month}/{year}"
+    return f"{year}-{month}-{date}"
+
+def date_to_string(datein):
+    month_dict = {'Jan': '01', 'Feb': '02', 'Mar': '03', 'Apr': '04', 'May': '05', 'Jun': '06', 'Jul': '07', 'Aug': '08', 'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dec': '12'}
+    datein = datein.split('-')
+    year = datein[0]
+    month = list(month_dict.keys())[list(month_dict.values()).index(datein[1])]
+    date = datein[2]
+    return f"{month} {date}, {year}"
 
 def get_all_categories():
     categories = df['Categories']
@@ -139,6 +151,7 @@ def get_games_by_name(name, df=df):
     return pd.DataFrame(games)
 
 def get_game_by_id(id, df=df):
+    print(df['AppID'])
     data = df[df['AppID'] == int(id)]
     if data.empty:
         return None
@@ -312,11 +325,7 @@ def delete_game(appid):
 @app.route('/')
 def home():
     
-    # df = random_games(25)
-    
     df = get_data()
-    
-    # df = df.head(25)
 
     args = request.args
     print(args)
@@ -439,8 +448,8 @@ def home():
 
 @app.route('/game/<appid>')
 def game(appid):
-    
-    game = get_game_by_id(appid)
+    df = get_data()
+    game = get_game_by_id(appid, df)
     
     if game is None:
         return redirect(url_for('home'))
@@ -452,28 +461,186 @@ def create():
     
     args = request.args
     
+    need_create = False
+    
+    if 'name' in args:
+        name = args['name']
+        need_create = True
+    else:
+        name = ''
+        
+    if 'price' in args:
+        if args['price'] == '':
+            price = 0
+        else:
+            price = float(args['price'])
+        need_create = True
+    else:
+        price = 0
+        
+    if 'metacritic_score' in args:
+        if args['metacritic_score'] == '':
+            metacritic_score = 0
+        else:
+            metacritic_score = int(args['metacritic_score'])
+        need_create = True
+    else:
+        metacritic_score = 0
+        
+    if 'genre' in args:
+        genres = args.getlist('genre')
+        need_create = True
+    else:
+        genres = []
+        
+    if 'category' in args:
+        categories = args.getlist('category')
+        need_create = True
+    else:
+        categories = []
+        
+    if 'tag' in args:
+        tags = args.getlist('tag')
+        need_create = True
+    else:
+        tags = []
+        
+    if 'platform' in args:
+        windows = 'Windows' in args.getlist('platform')
+        mac = 'Mac' in args.getlist('platform')
+        linux = 'Linux' in args.getlist('platform')
+        need_create = True
+    else:
+        windows = False
+        mac = False
+        linux = False
+        
+    if 'release_date' in args:
+        if args['release_date'] == '':
+            release_date = ''
+        else:
+            release_date = date_to_string(args['release_date'])
+        need_create = True
+    else:
+        release_date = ''
+        
+    if 'header_image' in args:
+        header_image = args['header_image']
+        need_create = True
+    else:
+        header_image = ''
+        
+    if need_create:
+        appid = add_game(name, price, metacritic_score, ','.join(genres), ','.join(categories), ','.join(tags), windows, mac, linux, release_date, header_image)
+        if appid:
+            set_data()
+            print(url_for('game', appid=appid))
+            return redirect(url_for('game', appid=appid))
+    
     tag = get_tags()
     genre = get_genres()
     platform = get_platforms()
     category = get_categories()
 
-    return render_template('create.html')
+    return render_template('create.html', tag=tag, genre=genre, platform=platform, category=category)
 
 
 @app.route('/edit/<appid>')
 def edit(appid):
     
-    game = get_game_by_id(appid)
+    df = get_data()
+    
+    game = get_game_by_id(appid, df)
     
     if game is None:
         return redirect(url_for('home'))
     
+    args = request.args
+    
+    need_update = False
+    
+    if 'name' in args:
+        name = args['name']
+        need_update = True
+    else:
+        name = game['Name']
+        
+    if 'price' in args:
+        if args['price'] == '':
+            price = game['Price']
+        else:
+            price = float(args['price'])
+        need_update = True
+    else:
+        price = game['Price']
+        
+    if 'metacritic_score' in args:
+        if args['metacritic_score'] == '':
+            metacritic_score = game['Metacritic score']
+        else:
+            metacritic_score = int(args['metacritic_score'])
+        need_update = True
+    else:
+        metacritic_score = game['Metacritic score']
+        
+    if 'genre' in args:
+        genres = args.getlist('genre')
+        need_update = True
+    else:
+        genres = game['Genres'].split(',')
+        
+    if 'category' in args:
+        categories = args.getlist('category')
+        need_update = True
+    else:
+        categories = game['Categories'].split(',')
+        
+    if 'tag' in args:
+        tags = args.getlist('tag')
+        need_update = True
+    else:
+        tags = game['Tags'].split(',')
+        
+    if 'platform' in args:
+        windows = 'Windows' in args.getlist('platform')
+        mac = 'Mac' in args.getlist('platform')
+        linux = 'Linux' in args.getlist('platform')
+        need_update = True
+    else:
+        windows = game['Windows']
+        mac = game['Mac']
+        linux = game['Linux']
+        
+    if 'release_date' in args:
+        if args['release_date'] == '':
+            release_date = game['Release date']
+        else:
+            release_date = date_to_string(args['release_date'])
+        need_update = True
+    else:
+        release_date = game['Release date']
+        
+    if 'header_image' in args:
+        header_image = args['header_image']
+        need_update = True
+    else:
+        header_image = game['Header image']
+        
+    if need_update:
+        updated = update_game(appid, name, price, metacritic_score, ','.join(genres), ','.join(categories), ','.join(tags), windows, mac, linux, release_date, header_image)
+        if updated:
+            return redirect(url_for('game', appid=appid))
+    
+    if game['Release date'] == '':
+        date = ''
+    else:
+        date = to_date(game['Release date'])
     tag = get_tags()
     genre = get_genres()
     platform = get_platforms()
     category = get_categories()
     
-    return render_template('edit.html', data=game, tag=tag, genre=genre, platform=platform, category=category)
+    return render_template('edit.html', data=game, tag=tag, genre=genre, platform=platform, category=category, date=date)
 
 @app.route('/delete/<appid>')
 def delete(appid):
