@@ -4,8 +4,8 @@ import random
 
 app = Flask(__name__)
 
-filename = 'games.csv'
-# filename = 'testgame.csv'
+#filename = 'games.csv'
+filename = 'testgame.csv'
 
 df = pd.read_csv(filename, encoding = 'utf-8')
 df = df.fillna('')
@@ -647,6 +647,10 @@ def delete(appid):
     if delete_game(appid):
         return redirect(url_for('home'))
     return redirect(url_for('game', appid=appid))
+
+@app.route('/stats')
+def stats():
+        return render_template('stats.html')
 
 if __name__ == '__main__':
     app.run(debug=True)

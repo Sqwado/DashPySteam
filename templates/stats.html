@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<style>
+    /* width */
+    ::-webkit-scrollbar {
+        width: 10px;
+    }
+
+    /* Track */
+    ::-webkit-scrollbar-track {
+        background: #1B2838;
+    }
+
+    /* Handle */
+    ::-webkit-scrollbar-thumb {
+        background: #171D25;
+        border-radius: 8px;
+    }
+
+    /* Handle on hover */
+    ::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+</style>
+<body class="w-screen h-screen bg-[#1B2838] overflow-x-hidden">
+<header class="w-screen h-1/6 bg-[#171D25] flex">
+    <a href="/" class="w-96 h-full flex items-center justify-center">
+        <img src="{{ url_for('static', filename='images/logo_steam.png') }}" alt="logo steam"
+             class=" fit-cover p-4" />
+    </a>
+    <nav class="w-3/6 h-full flex items-center justify-center">
+        <h2 class="text-xl text-white">Statistique</h2>
+    </nav>
+    <div class="w-1/6 h-full flex items-center justify-end">
+        <div class="relative inline-block text-left">
+            <label for="sort-select" class="text-white">Trier par :</label>
+            <select
+                    class=" rounded-md bg-[#171D25] px-3 py-2 text-sm font-semibold text-white shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent cursor-pointer mr-4"
+                    id="sort-select">
+                <option value="alpha-asc">Ordre Alphabétique</option>
+                <option value="alpha-desc">Ordre Anti-Alphabétique</option>
+                <option value="price-asc">Prix Croissant</option>
+                <option value="price-desc">Prix Décroissant</option>
+                <option value="metacritic-asc">MétaCritic Croissant</option>
+                <option value="metacritic-desc">MétaCritic Décroissant</option>
+            </select>
+        </div>
+    </div>
+    <div class="w-24 h-full flex items-center justify-end mr-2">
+
+    </div>
+</header>
+<main class="w-screen h-5/6 flex ">
+</main>
+</body>
+</html>
