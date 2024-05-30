@@ -2,8 +2,8 @@ import pandas as pd
 import random
 import re
 
-filename = 'games.csv'
-# filename = 'testgame.csv'
+# filename = 'games.csv'
+filename = 'testgame.csv'
 
 df = pd.read_csv(filename, encoding = 'utf-8')
 df = df.fillna('')
@@ -350,7 +350,7 @@ def graph_prix_moyen_year(df=df):
         if count == 0:
             moyennes.append(0)
         else:
-            moyennes.append(total/count)
+            moyennes.append(round((total/count), 2))
     return pd.DataFrame({'Year': years, 'Average Price': moyennes})
 
 def graph_genre_hight_price(df=df):
@@ -358,13 +358,16 @@ def graph_genre_hight_price(df=df):
     df = df[df['Price'] != 0.0]
     df = df[df['Genres'] != '']
     prices = []
+    games_names = []
     for genre in genres:
         genre_games = get_games_by_genre([genre], df)
         if genre_games.empty:
             prices.append(0)
+            games_names.append('')
         else:
             prices.append(genre_games['Price'].max())
-    return pd.DataFrame({'Genre': genres, 'Highest Price': prices})
+            games_names.append(genre_games[genre_games['Price'] == genre_games['Price'].max()]['Name'].values[0])
+    return pd.DataFrame({'Genre': genres, 'Highest Price': prices, 'Game Name': games_names})
 
 def graph_best_score_platform_label_name(df=df):
     platforms = get_all_platforms()
@@ -376,6 +379,7 @@ def graph_best_score_platform_label_name(df=df):
         platform_games = get_games_by_platform([platform], df)
         if platform_games.empty:
             scores.append(0)
+            games_names.append('')
         else:
             scores.append(platform_games['Metacritic score'].max())
             games_names.append(platform_games[platform_games['Metacritic score'] == platform_games['Metacritic score'].max()]['Name'].values[0])

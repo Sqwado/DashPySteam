@@ -4,8 +4,8 @@ import random
 
 app = Flask(__name__)
 
-filename = 'games.csv'
-# filename = 'testgame.csv'
+# filename = 'games.csv'
+filename = 'testgame.csv'
 
 df = pd.read_csv(filename, encoding = 'utf-8')
 df = df.fillna('')
@@ -362,6 +362,7 @@ def graph_genre_hight_price(df=df):
         genre_games = get_games_by_genre([genre], df)
         if genre_games.empty:
             prices.append(0)
+            games_names.append('')
         else:
             prices.append(genre_games['Price'].max())
             games_names.append(genre_games[genre_games['Price'] == genre_games['Price'].max()]['Name'].values[0])
@@ -377,6 +378,7 @@ def graph_best_score_platform_label_name(df=df):
         platform_games = get_games_by_platform([platform], df)
         if platform_games.empty:
             scores.append(0)
+            games_names.append('')
         else:
             scores.append(platform_games['Metacritic score'].max())
             games_names.append(platform_games[platform_games['Metacritic score'] == platform_games['Metacritic score'].max()]['Name'].values[0])
