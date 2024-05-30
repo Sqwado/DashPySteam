@@ -20,10 +20,10 @@ def set_data():
 def get_data():
     return df
 
+
 def to_date(datein):
     if type(datein) != str:
         return datein
-    print(datein)
     month_dict = {'Jan': '01', 'Feb': '02', 'Mar': '03', 'Apr': '04', 'May': '05', 'Jun': '06', 'Jul': '07', 'Aug': '08', 'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dec': '12'}
     datein = datein.replace(',', '')
     datein = datein.split(' ')
@@ -324,6 +324,33 @@ def delete_game(appid):
     df.to_csv(filename, index=False, encoding='utf-8')
     return True
 
+def graph_prix_moyen_year(df):
+    years = []
+    for i in range(len(df)):
+        if type(df['Release date'][i]) != str:
+            continue
+        date = to_date(df['Release date'][i])
+        year = date.split('/')[2]
+        if year not in years:
+            years.append(year)
+    years.sort()
+    moyennes = []
+    for year in years:
+        prix = 0
+        count = 0
+        for i in range(len(df)):
+            if type(df['Release date'][i]) != str:
+                continue
+            date = to_date(df['Release date'][i])
+            if date.split('/')[2] == year:
+                prix += df['Price'][i]
+                count += 1
+        if count == 0:
+            moyennes.append(0)
+        else:
+            moyennes.append(prix/count)
+    return pd.DataFrame({'Year': years, 'Average Price': moyennes})
+
 # write_categories()
 # write_genres()
 # write_tags()
@@ -369,10 +396,11 @@ def delete_game(appid):
 
 df = get_data()
 
-df = get_games_by_price_range(0, 10.11, df)
+# df = get_games_by_price_range(0, 10.11, df)
+
+df = graph_prix_moyen_year(df)
 
 print(df)
-
 # print(get_min_price(df))
 # print(get_max_price(df))
 
