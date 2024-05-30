@@ -4,8 +4,8 @@ import random
 
 app = Flask(__name__)
 
-#filename = 'games.csv'
-filename = 'testgame.csv'
+filename = 'games.csv'
+# filename = 'testgame.csv'
 
 df = pd.read_csv(filename, encoding = 'utf-8')
 df = df.fillna('')
@@ -57,6 +57,7 @@ def get_all_categories():
             if this_categories[j] not in all_categories:
                 all_categories.append(this_categories[j])
     all_categories.sort()
+    all_categories = [category for category in all_categories if category != '']
     return all_categories
 
 def get_all_genres():
@@ -70,6 +71,7 @@ def get_all_genres():
             if this_genres[j] not in all_genres:
                 all_genres.append(this_genres[j])
     all_genres.sort()
+    all_genres = [genre for genre in all_genres if genre != '']
     return all_genres
 
 def get_all_tags():
@@ -83,6 +85,7 @@ def get_all_tags():
             if this_tags[j] not in all_tags:
                 all_tags.append(this_tags[j])
     all_tags.sort()
+    all_tags = [tag for tag in all_tags if tag != '']
     return all_tags
 
 def get_all_platforms():
@@ -105,9 +108,9 @@ def get_games_by_genre(genre, df=df):
     if len(genre) < 1:
         return df
     for i in range(len(df)):
-        if type(df['Genres'][i]) != str:
+        if type(df['Genres'].values[i]) != str:
             continue
-        if set(genre).issubset(set(df['Genres'][i].split(','))):
+        if set(genre).issubset(set(df['Genres'].values[i].split(','))):
             games.append(df.iloc[i].to_dict())
     return pd.DataFrame(games)
 
@@ -128,13 +131,12 @@ def get_games_by_platform(platform, df=df):
         if j in ['Windows', 'Mac', 'Linux']:
             bool_platform[['Windows', 'Mac', 'Linux'].index(j)] = True
     games = []
-    print(bool_platform)
     for i in range(len(df)):                
-        if bool_platform[0] and not df['Windows'][i]:
+        if bool_platform[0] and not df['Windows'].values[i]:
             continue
-        if bool_platform[1] and not df['Mac'][i]:
+        if bool_platform[1] and not df['Mac'].values[i]:
             continue
-        if bool_platform[2] and not df['Linux'][i]:
+        if bool_platform[2] and not df['Linux'].values[i]:
             continue
         games.append(df.iloc[i].to_dict())
     return pd.DataFrame(games)
@@ -321,6 +323,89 @@ def delete_game(appid):
     df.drop(index, inplace=True)
     df.to_csv(filename, index=False, encoding='utf-8')
     return True
+
+def graph_prix_moyen_year(df=df):
+    df = df[df['Price'] != 0.0]
+    years = []
+    for i in range(len(df)):
+        if type(df['Release date'].values[i]) != str:
+            continue
+        date = to_date(df['Release date'].values[i])
+        year = date.split('-')[0]
+        if year not in years:
+            years.append(year)
+    years.sort()
+    moyennes = []
+    for year in years:
+        total = 0
+        count = 0
+        for i in range(len(df)):
+            if type(df['Release date'].values[i]) != str:
+                continue
+            date = to_date(df['Release date'].values[i])
+            if date.split('-')[0] == year:
+                total += df['Price'].values[i]
+                count += 1
+        if count == 0:
+            moyennes.append(0)
+        else:
+            moyennes.append(round((total/count), 2))
+    return pd.DataFrame({'Year': years, 'Average Price': moyennes})
+
+def graph_genre_hight_price(df=df):
+    genres = get_all_genres()
+    df = df[df['Price'] != 0.0]
+    df = df[df['Genres'] != '']
+    prices = []
+    games_names = []
+    for genre in genres:
+        genre_games = get_games_by_genre([genre], df)
+        if genre_games.empty:
+            prices.append(0)
+        else:
+            prices.append(genre_games['Price'].max())
+            games_names.append(genre_games[genre_games['Price'] == genre_games['Price'].max()]['Name'].values[0])
+    return pd.DataFrame({'Genre': genres, 'Highest Price': prices, 'Game Name': games_names})
+
+def graph_best_score_platform_label_name(df=df):
+    platforms = get_all_platforms()
+    df = df[df['Metacritic score'] != '']
+    df = df[df['Metacritic score'] != 0]
+    scores = []
+    games_names = []
+    for platform in platforms:
+        platform_games = get_games_by_platform([platform], df)
+        if platform_games.empty:
+            scores.append(0)
+        else:
+            scores.append(platform_games['Metacritic score'].max())
+            games_names.append(platform_games[platform_games['Metacritic score'] == platform_games['Metacritic score'].max()]['Name'].values[0])
+    return pd.DataFrame({'Platform': platforms, 'Best Score': scores, 'Game Name': games_names})
+
+def graph_best_score_year_platform_label_name(platform, df=df):
+    df = df[df['Metacritic score'] != '']
+    df = df[df['Metacritic score'] != 0]
+    df = get_games_by_platform([platform], df)
+    years = []
+    scores = []
+    games_names = []
+    for i in range(len(df)):
+        if type(df['Release date'].values[i]) != str:
+            continue
+        date = to_date(df['Release date'].values[i])
+        year = date.split('-')[0]
+        if year not in years:
+            years.append(year)
+    years.sort()
+    for year in years:
+        year_games = df[df['Release date'].apply(to_date).str.contains(year)]
+        if year_games.empty:
+            scores.append(0)
+            games_names.append('')
+        else:
+            scores.append(year_games['Metacritic score'].max())
+            games_names.append(year_games[year_games['Metacritic score'] == year_games['Metacritic score'].max()]['Name'].values[0])
+    return pd.DataFrame({'Year': years, 'Best Score': scores, 'Game Name': games_names})
 
 @app.route('/')
 def home():
@@ -650,7 +735,48 @@ def delete(appid):
 
 @app.route('/stats')
 def stats():
-        return render_template('stats.html')
+    
+    args = request.args
+    
+    df = get_data()
+    
+    if 'graph' in args:
+        if args['graph'] == 'genre_hight_price':
+            data = graph_genre_hight_price(df)
+            values = data['Highest Price'].tolist()
+            labels = data['Genre'].tolist()
+            names = data['Game Name'].tolist()
+            return render_template('stats.html', values=values, labels=labels, names=names)
+        elif args['graph'] == 'best_score_platform_label_name':
+            data = graph_best_score_platform_label_name(df)
+            values = data['Best Score'].tolist()
+            labels = data['Platform'].tolist()
+            names = data['Game Name'].tolist()
+            return render_template('stats.html', values=values, labels=labels, names=names)
+        elif args['graph'] == 'best_score_year_platform_label_name':
+            datawindows = graph_best_score_year_platform_label_name('Windows', df)
+            datamac = (graph_best_score_year_platform_label_name('Mac', df))
+            datalinux = (graph_best_score_year_platform_label_name('Linux', df))
+            valueswindows = datawindows['Best Score'].tolist()
+            labelswindows = datawindows['Year'].tolist()
+            nameswindows = datawindows['Game Name'].tolist()
+            valuesmac = datamac['Best Score'].tolist()
+            labelsmac = datamac['Year'].tolist()
+            namesmac = datamac['Game Name'].tolist()
+            valueslinux = datalinux['Best Score'].tolist()
+            labelslinux = datalinux['Year'].tolist()
+            nameslinux = datalinux['Game Name'].tolist()
+            return render_template('stats.html', valueswindows=valueswindows, labelswindows=labelswindows, nameswindows=nameswindows, valuesmac=valuesmac, labelsmac=labelsmac, namesmac=namesmac, valueslinux=valueslinux, labelslinux=labelslinux, nameslinux=nameslinux) 
+        else:
+            data = graph_prix_moyen_year(df)
+            values = data['Average Price'].tolist()
+            labels = data['Year'].tolist()
+            return render_template('stats.html', values=values, labels=labels, names=[])
+    else:
+        data = graph_prix_moyen_year(df)
+        values = data['Average Price'].tolist()
+        labels = data['Year'].tolist()
+        return render_template('stats.html', values=values, labels=labels)
 
 if __name__ == '__main__':
     app.run(debug=True)

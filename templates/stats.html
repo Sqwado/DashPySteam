@@ -1,9 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
 </head>
 <style>
     /* width */
@@ -27,35 +30,376 @@
         background: #555;
     }
 </style>
+
 <body class="w-screen h-screen bg-[#1B2838] overflow-x-hidden">
-<header class="w-screen h-1/6 bg-[#171D25] flex">
-    <a href="/" class="w-96 h-full flex items-center justify-center">
-        <img src="{{ url_for('static', filename='images/logo_steam.png') }}" alt="logo steam"
-             class=" fit-cover p-4" />
-    </a>
-    <nav class="w-3/6 h-full flex items-center justify-center">
-        <h2 class="text-xl text-white">Statistique</h2>
-    </nav>
-    <div class="w-1/6 h-full flex items-center justify-end">
-        <div class="relative inline-block text-left">
-            <label for="sort-select" class="text-white">Trier par :</label>
-            <select
+    <header class="w-screen h-1/6 bg-[#171D25] flex">
+        <a href="/" class="w-96 h-full flex items-center justify-center">
+            <img src="{{ url_for('static', filename='images/logo_steam.png') }}" alt="logo steam"
+                class=" fit-cover p-4" />
+        </a>
+        <nav class="w-3/6 h-full flex items-center justify-center">
+            <h2 class="text-xl text-white">Statistique</h2>
+        </nav>
+        <div class="w-1/6 h-full flex items-center justify-end">
+            <div class="relative inline-block text-left">
+                <label for="sort-select" class="text-white">Trier par :</label>
+                <select
                     class=" rounded-md bg-[#171D25] px-3 py-2 text-sm font-semibold text-white shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent cursor-pointer mr-4"
                     id="sort-select">
-                <option value="alpha-asc">Ordre Alphabétique</option>
-                <option value="alpha-desc">Ordre Anti-Alphabétique</option>
-                <option value="price-asc">Prix Croissant</option>
-                <option value="price-desc">Prix Décroissant</option>
-                <option value="metacritic-asc">MétaCritic Croissant</option>
-                <option value="metacritic-desc">MétaCritic Décroissant</option>
-            </select>
+                    <option value="genre_hight_price">Genre avec le prix le plus élevé</option>
+                    <option value="best_score_platform_label_name">Meilleur score par plateforme avec le nom du jeu
+                    </option>
+                    <option value="best_score_year_platform_label_name">Meilleur score par année par plateforme avec le
+                        nom du jeu</option>
+                    <option value="average_price_year">Prix moyen par année</option>
+                </select>
+            </div>
         </div>
-    </div>
-    <div class="w-24 h-full flex items-center justify-end mr-2">
+        <div class="w-24 h-full flex items-center justify-end mr-2">
 
-    </div>
-</header>
-<main class="w-screen h-5/6 flex ">
-</main>
+        </div>
+    </header>
+    <main class="w-screen h-5/6 flex overflow-y-scroll justify-center items-center p-4">
+        <canvas id="myChart" class="w-full h-full"></canvas>
+    </main>
 </body>
+
+<script>
+
+    const sortSelect = document.getElementById('sort-select');
+
+    sortSelect.addEventListener('change', (e) => {
+        const value = e.target.value;
+        const url = new URL(window.location.href);
+        url.searchParams.set('graph', value);
+        window.location.href = url.toString();
+    });
+
+    const args = new URLSearchParams(window.location.search);
+
+    if (args.has('graph')) {
+        const value = args.get('graph');
+        sortSelect.value = value;
+    }
+
+    let config = {};
+
+    if (args.has('graph')) {
+        const graph = args.get('graph');
+        if (graph === 'genre_hight_price') {
+            const labels = "{{ labels | safe}}".replace(/[\[\]']+/g, '').split(',');
+            const values = "{{ values | safe}}".replace(/[\[\]']+/g, '').split(',');
+            const names = "{{ names | safe}}".replace(/[\[\]']+/g, '').split(',');
+            const data = {
+                labels: labels,
+                datasets: [{
+                    label: 'Prix le plus élevé par genre avec le nom du jeu',
+                    data: values,
+                    backgroundColor: [
+                        'rgba(255, 26, 104, 0.2)',
+                    ],
+                    borderColor: [
+                        'rgba(255, 26, 104, 1)',
+                    ],
+                    borderWidth: 1
+                }]
+            };
+
+            // config
+            config = {
+                type: 'bar',
+                data,
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grace: '5%',
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            enabled: false
+                        },
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'top',
+                            formatter: (value, context) => {
+                                if (context.active === true) {
+                                    return names[context.dataIndex];
+                                } else {
+                                    return value;
+                                }
+                            }
+                        }
+                    }
+                },
+                plugins: [ChartDataLabels],
+            };
+
+            // render init block
+            const myChart = new Chart(
+                document.getElementById('myChart'),
+                config,
+            );
+
+        } else if (graph === 'best_score_platform_label_name') {
+            const labels = "{{ labels | safe}}".replace(/[\[\]']+/g, '').split(',');
+            const values = "{{ values | safe}}".replace(/[\[\]']+/g, '').split(',');
+            const names = "{{ names | safe}}".replace(/[\[\]']+/g, '').split(',');
+            const data = {
+                labels: labels,
+                datasets: [{
+                    label: 'Meilleur score par plateforme avec le nom du jeu',
+                    data: values,
+                    backgroundColor: [
+                        'rgba(255, 26, 104, 0.2)',
+                    ],
+                    borderColor: [
+                        'rgba(255, 26, 104, 1)',
+                    ],
+                    borderWidth: 1
+                }]
+            };
+
+            // config
+            config = {
+                type: 'bar',
+                data,
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grace: '5%',
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            enabled: false
+                        },
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'top',
+                            formatter: (value, context) => {
+                                if (context.active === true) {
+                                    return names[context.dataIndex];
+                                } else {
+                                    return value;
+                                }
+                            }
+                        }
+                    }
+                },
+                plugins: [ChartDataLabels],
+            };
+
+            // render init block
+            const myChart = new Chart(
+                document.getElementById('myChart'),
+                config,
+            );
+
+        } else if (graph === 'best_score_year_platform_label_name') {
+            const labelswindows = "{{ labelswindows | safe}}".replace(/[\[\]']+/g, '').split(',');
+            const valueswindows = "{{ valueswindows | safe}}".replace(/[\[\]']+/g, '').split(',');
+            const nameswindows = `{{ nameswindows | safe}}`.replace(/[\[\]']+/g, '').split(',');
+            const labelmac = "{{ labelsmac | safe}}".replace(/[\[\]']+/g, '').split(',');
+            const valuesmac = "{{ valuesmac | safe}}".replace(/[\[\]']+/g, '').split(',');
+            const namesmac = `{{ namesmac | safe}}`.replace(/[\[\]']+/g, '').split(',');
+            const labelslinux = "{{ labelslinux | safe}}".replace(/[\[\]']+/g, '').split(',');
+            const valueslinux = "{{ valueslinux | safe}}".replace(/[\[\]']+/g, '').split(',');
+            const nameslinux = `{{ nameslinux | safe}}`.replace(/[\[\]']+/g, '').split(',');
+            const data = {
+                labels: labelswindows,
+                datasets: [{
+                    label: 'Meilleur score par année sur Windows avec le nom du jeu',
+                    data: valueswindows,
+                    backgroundColor: [
+                        'rgba(255, 26, 104, 0.2)',
+                    ],
+                    borderColor: [
+                        'rgba(255, 26, 104, 1)',
+                    ],
+                    borderWidth: 1
+                },
+                {
+                    label: 'Meilleur score par année sur Mac avec le nom du jeu',
+                    data: valuesmac,
+                    backgroundColor: [
+                        'rgba(40, 255, 104, 1)',
+                    ],
+                    borderColor: [
+                        'rgba(40, 255, 104, 1)',
+                    ],
+                    borderWidth: 1
+                },
+                {
+                    label: 'Meilleur score par année sur Linux avec le nom du jeu',
+                    data: valueslinux,
+                    backgroundColor: [
+                        'rgba(104, 26, 255, 1)',
+                    ],
+                    borderColor: [
+                        'rgba(104, 26, 255, 1)',
+                    ],
+                    borderWidth: 1
+                }]
+            };
+
+            // config
+            config = {
+                type: 'bar',
+                data,
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grace: '5%',
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            enabled: false
+                        },
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'top',
+                            formatter: (value, context) => {
+                                if (context.active === true) {
+                                    return nameswindows[context.dataIndex];
+                                } else {
+                                    return value;
+                                }
+                            },
+                            color: 'white',
+                            backgroundColor: 'rgba(255, 26, 104, 0.2)',
+                        }
+                    }
+                },
+                plugins: [ChartDataLabels],
+            };
+
+            // render init block
+            const myChart = new Chart(
+                document.getElementById('myChart'),
+                config,
+            );
+
+        } else {
+            const labels = "{{ labels | safe}}".replace(/[\[\]']+/g, '').split(',');
+            const values = "{{ values | safe}}".replace(/[\[\]']+/g, '').split(',');
+            const names = "{{ names | safe}}".replace(/[\[\]']+/g, '').split(',');
+            const data = {
+                labels: labels,
+                datasets: [{
+                    label: 'Prix moyen par année',
+                    data: values,
+                    backgroundColor: [
+                        'rgba(255, 26, 104, 0.2)',
+                    ],
+                    borderColor: [
+                        'rgba(255, 26, 104, 1)',
+                    ],
+                    borderWidth: 1
+                }]
+            };
+
+            // config 
+            config = {
+                type: 'line',
+                data,
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grace: '5%',
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            enabled: false
+                        },
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'top',
+                            backgroundColor: "rgba(255, 26, 104, 0.2)",
+                            formatter: (value, context) => {
+                                if (context.active === true) {
+                                    return names[context.dataIndex];
+                                } else {
+                                    return value;
+                                }
+                            }
+                        }
+                    }
+                },
+                plugins: [ChartDataLabels],
+            };
+
+            // render init block
+            const myChart = new Chart(
+                document.getElementById('myChart'),
+                config
+            );
+
+        }
+    } else {
+        const labels = "{{ labels | safe}}".replace(/[\[\]']+/g, '').split(',');
+        const values = "{{ values | safe}}".replace(/[\[\]']+/g, '').split(',');
+        const names = "{{ names | safe}}".replace(/[\[\]']+/g, '').split(',');
+        const data = {
+            labels: labels,
+            datasets: [{
+                label: 'Prix moyen par année',
+                data: values,
+                backgroundColor: [
+                    'rgba(255, 26, 104, 0.2)',
+                ],
+                borderColor: [
+                    'rgba(255, 26, 104, 1)',
+                ],
+                borderWidth: 1
+            }]
+        };
+
+        // config 
+        config = {
+            type: 'bar',
+            data,
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grace: '5%',
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        enabled: false
+                    },
+                    datalabels: {
+                        anchor: 'end',
+                        align: 'top',
+                        formatter: (value, context) => {
+                            if (context.active === true) {
+                                return names[context.dataIndex];
+                            } else {
+                                return value;
+                            }
+                        }
+                    }
+                }
+            },
+            plugins: [ChartDataLabels],
+        };
+
+        // render init block
+        const myChart = new Chart(
+            document.getElementById('myChart'),
+            config
+        );
+
+    }
+
+</script>
+
 </html>

@@ -20,7 +20,6 @@ def set_data():
 def get_data():
     return df
 
-
 def to_date(datein):
     if type(datein) != str:
         return datein
@@ -38,15 +37,14 @@ def to_date(datein):
     if len(date) == 1:
         date = '0' + date
     month = month_dict[month]
-    return f"{date}/{month}/{year}"
+    return f"{year}-{month}-{date}"
 
 def date_to_string(datein):
     month_dict = {'Jan': '01', 'Feb': '02', 'Mar': '03', 'Apr': '04', 'May': '05', 'Jun': '06', 'Jul': '07', 'Aug': '08', 'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dec': '12'}
-    datein = datein.split('/')
-    date = datein[0]
-    month = datein[1]
-    year = datein[2]
-    month = list(month_dict.keys())[list(month_dict.values()).index(month)]
+    datein = datein.split('-')
+    year = datein[0]
+    month = list(month_dict.keys())[list(month_dict.values()).index(datein[1])]
+    date = datein[2]
     return f"{month} {date}, {year}"
 
 def get_all_categories():
@@ -60,6 +58,7 @@ def get_all_categories():
             if this_categories[j] not in all_categories:
                 all_categories.append(this_categories[j])
     all_categories.sort()
+    all_categories = [category for category in all_categories if category != '']
     return all_categories
 
 def get_all_genres():
@@ -73,6 +72,7 @@ def get_all_genres():
             if this_genres[j] not in all_genres:
                 all_genres.append(this_genres[j])
     all_genres.sort()
+    all_genres = [genre for genre in all_genres if genre != '']
     return all_genres
 
 def get_all_tags():
@@ -86,6 +86,7 @@ def get_all_tags():
             if this_tags[j] not in all_tags:
                 all_tags.append(this_tags[j])
     all_tags.sort()
+    all_tags = [tag for tag in all_tags if tag != '']
     return all_tags
 
 def get_all_platforms():
@@ -108,9 +109,9 @@ def get_games_by_genre(genre, df=df):
     if len(genre) < 1:
         return df
     for i in range(len(df)):
-        if type(df['Genres'][i]) != str:
+        if type(df['Genres'].values[i]) != str:
             continue
-        if set(genre).issubset(set(df['Genres'][i].split(','))):
+        if set(genre).issubset(set(df['Genres'].values[i].split(','))):
             games.append(df.iloc[i].to_dict())
     return pd.DataFrame(games)
 
@@ -131,13 +132,12 @@ def get_games_by_platform(platform, df=df):
         if j in ['Windows', 'Mac', 'Linux']:
             bool_platform[['Windows', 'Mac', 'Linux'].index(j)] = True
     games = []
-    print(bool_platform)
     for i in range(len(df)):                
-        if bool_platform[0] and not df['Windows'][i]:
+        if bool_platform[0] and not df['Windows'].values[i]:
             continue
-        if bool_platform[1] and not df['Mac'][i]:
+        if bool_platform[1] and not df['Mac'].values[i]:
             continue
-        if bool_platform[2] and not df['Linux'][i]:
+        if bool_platform[2] and not df['Linux'].values[i]:
             continue
         games.append(df.iloc[i].to_dict())
     return pd.DataFrame(games)
@@ -154,6 +154,7 @@ def get_games_by_name(name, df=df):
     return pd.DataFrame(games)
 
 def get_game_by_id(id, df=df):
+    print(df['AppID'])
     data = df[df['AppID'] == int(id)]
     if data.empty:
         return None
@@ -324,33 +325,87 @@ def delete_game(appid):
     df.to_csv(filename, index=False, encoding='utf-8')
     return True
 
-def graph_prix_moyen_year(df):
+def graph_prix_moyen_year(df=df):
+    df = df[df['Price'] != 0.0]
     years = []
     for i in range(len(df)):
-        if type(df['Release date'][i]) != str:
+        if type(df['Release date'].values[i]) != str:
             continue
-        date = to_date(df['Release date'][i])
-        year = date.split('/')[2]
+        date = to_date(df['Release date'].values[i])
+        year = date.split('-')[0]
         if year not in years:
             years.append(year)
     years.sort()
     moyennes = []
     for year in years:
-        prix = 0
+        total = 0
         count = 0
         for i in range(len(df)):
-            if type(df['Release date'][i]) != str:
+            if type(df['Release date'].values[i]) != str:
                 continue
-            date = to_date(df['Release date'][i])
-            if date.split('/')[2] == year:
-                prix += df['Price'][i]
+            date = to_date(df['Release date'].values[i])
+            if date.split('-')[0] == year:
+                total += df['Price'].values[i]
                 count += 1
         if count == 0:
             moyennes.append(0)
         else:
-            moyennes.append(prix/count)
+            moyennes.append(total/count)
     return pd.DataFrame({'Year': years, 'Average Price': moyennes})
 
+def graph_genre_hight_price(df=df):
+    genres = get_all_genres()
+    df = df[df['Price'] != 0.0]
+    df = df[df['Genres'] != '']
+    prices = []
+    for genre in genres:
+        genre_games = get_games_by_genre([genre], df)
+        if genre_games.empty:
+            prices.append(0)
+        else:
+            prices.append(genre_games['Price'].max())
+    return pd.DataFrame({'Genre': genres, 'Highest Price': prices})
+
+def graph_best_score_platform_label_name(df=df):
+    platforms = get_all_platforms()
+    df = df[df['Metacritic score'] != '']
+    df = df[df['Metacritic score'] != 0]
+    scores = []
+    games_names = []
+    for platform in platforms:
+        platform_games = get_games_by_platform([platform], df)
+        if platform_games.empty:
+            scores.append(0)
+        else:
+            scores.append(platform_games['Metacritic score'].max())
+            games_names.append(platform_games[platform_games['Metacritic score'] == platform_games['Metacritic score'].max()]['Name'].values[0])
+    return pd.DataFrame({'Platform': platforms, 'Best Score': scores, 'Game Name': games_names})
+
+def graph_best_score_year_platform_label_name(platform, df=df):
+    df = df[df['Metacritic score'] != '']
+    df = df[df['Metacritic score'] != 0]
+    df = get_games_by_platform([platform], df)
+    years = []
+    scores = []
+    games_names = []
+    for i in range(len(df)):
+        if type(df['Release date'].values[i]) != str:
+            continue
+        date = to_date(df['Release date'].values[i])
+        year = date.split('-')[0]
+        if year not in years:
+            years.append(year)
+    years.sort()
+    for year in years:
+        year_games = df[df['Release date'].apply(to_date).str.contains(year)]
+        if year_games.empty:
+            scores.append(0)
+            games_names.append('')
+        else:
+            scores.append(year_games['Metacritic score'].max())
+            games_names.append(year_games[year_games['Metacritic score'] == year_games['Metacritic score'].max()]['Name'].values[0])
+    return pd.DataFrame({'Year': years, 'Best Score': scores, 'Game Name': games_names})
+   
 # write_categories()
 # write_genres()
 # write_tags()
@@ -398,9 +453,14 @@ df = get_data()
 
 # df = get_games_by_price_range(0, 10.11, df)
 
-df = graph_prix_moyen_year(df)
+windowstopgames = graph_best_score_year_platform_label_name('Windows', df)
+linuxtopgames = graph_best_score_year_platform_label_name('Linux', df)
+mactopgames = graph_best_score_year_platform_label_name('Mac', df)
 
-print(df)
+print(windowstopgames)
+print(linuxtopgames)
+print(mactopgames)
+
 # print(get_min_price(df))
 # print(get_max_price(df))
 
