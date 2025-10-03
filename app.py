@@ -1,20 +1,106 @@
 from flask import Flask, render_template, request, redirect, url_for
 import pandas as pd
 import random
+import re
+import os
+import time
+
+# Accélération GPU optionnelle via cuDF
+try:
+    import cudf as _gd
+    CUDF_AVAILABLE = True
+except Exception:
+    _gd = None
+    CUDF_AVAILABLE = False
+
+# Flag runtime (peut être modifié par requête/env)
+USE_CUDF = CUDF_AVAILABLE
+
+def _resolve_engine(args):
+    global USE_CUDF
+    env_force = os.getenv('DASPYSTEAM_GPU', '')  # '1' pour GPU, '0' pour CPU
+    if 'gpu' in args:
+        use_gpu = args.get('gpu') in ['1', 'true', 'True', 'yes']
+        USE_CUDF = CUDF_AVAILABLE and use_gpu
+    elif env_force != '':
+        USE_CUDF = CUDF_AVAILABLE and (env_force in ['1', 'true', 'True', 'yes'])
+    else:
+        USE_CUDF = CUDF_AVAILABLE
+    return 'cuDF' if USE_CUDF else 'pandas'
 
 app = Flask(__name__)
 
 # filename = 'games.csv'
-filename = 'testgame.csv'
+filename = 'games.csv'
 
-df = pd.read_csv(filename, encoding = 'utf-8')
-df = df.fillna('')
+def _read_csv(path):
+    if USE_CUDF:
+        return _gd.read_csv(path)
+    return pd.read_csv(path, encoding='utf-8')
+
+def _to_pandas(frame):
+    try:
+        if _gd is not None and isinstance(frame, _gd.DataFrame):
+            return frame.to_pandas()
+    except Exception:
+        pass
+    return frame
+
+def _ensure_series_numeric(series):
+    if USE_CUDF:
+        # cuDF: astype with null handling
+        try:
+            return series.astype('float32')
+        except Exception:
+            return series
+    # pandas
+    return pd.to_numeric(series, errors='coerce')
+
+def _safe_fillna_frame(frame):
+    if not USE_CUDF:
+        return frame.fillna('')
+    # cuDF: éviter de remplir les colonnes numériques avec des chaînes
+    for c in frame.columns:
+        col = frame[c]
+        try:
+            kind = getattr(col.dtype, 'kind', None)
+            if kind == 'b':
+                frame[c] = col.fillna(False)
+            elif kind in ('i', 'u', 'f'):
+                # Laisser NaN; les filtres numériques gèrent NaN via isna/notna
+                frame[c] = col
+            else:
+                frame[c] = col.fillna('')
+        except Exception:
+            try:
+                frame[c] = col.fillna('')
+            except Exception:
+                pass
+    return frame
+
+def _string_contains(series, pattern):
+    if USE_CUDF:
+        return series.fillna('').str.contains(pattern, regex=True)
+    return series.str.contains(pattern, regex=True, na=False)
+
+def _ensure_engine_frame(frame):
+    # Convertit le DataFrame vers le moteur choisi
+    if USE_CUDF:
+        if CUDF_AVAILABLE and isinstance(frame, pd.DataFrame):
+            return _gd.from_pandas(frame)
+        return frame
+    else:
+        # Forcer pandas même si frame est cuDF
+        return _to_pandas(frame)
+
+df = _read_csv(filename)
+df = _safe_fillna_frame(df)
 # df = df[df['Name'] != '' & df['Price'] != '' & df['Header image'] != '']
 
 def set_data():
     global df
-    df = pd.read_csv(filename, encoding = 'utf-8')
-    df = df.fillna('')
+    df = _read_csv(filename)
+    df = _safe_fillna_frame(df)
 
 def get_data():
     return df
@@ -48,44 +134,56 @@ def date_to_string(datein):
 
 def get_all_categories():
     categories = df['Categories']
+    if USE_CUDF:
+        unique_vals = set()
+        for val in categories.fillna('').to_pandas().tolist():
+            if isinstance(val, str) and val:
+                unique_vals.update([v for v in val.split(',') if v])
+        return sorted(list(unique_vals))
     all_categories = []
-    for i in range(len(categories)):
-        if type(categories[i]) != str:
+    for val in categories:
+        if type(val) != str:
             continue
-        this_categories = categories[i].split(',')
-        for j in range(len(this_categories)):
-            if this_categories[j] not in all_categories:
-                all_categories.append(this_categories[j])
+        for item in val.split(','):
+            if item not in all_categories and item != '':
+                all_categories.append(item)
     all_categories.sort()
-    all_categories = [category for category in all_categories if category != '']
     return all_categories
 
 def get_all_genres():
     genres = df['Genres']
+    if USE_CUDF:
+        unique_vals = set()
+        for val in genres.fillna('').to_pandas().tolist():
+            if isinstance(val, str) and val:
+                unique_vals.update([v for v in val.split(',') if v])
+        return sorted(list(unique_vals))
     all_genres = []
-    for i in range(len(genres)):
-        if type(genres[i]) != str:
+    for val in genres:
+        if type(val) != str:
             continue
-        this_genres = genres[i].split(',')
-        for j in range(len(this_genres)):
-            if this_genres[j] not in all_genres:
-                all_genres.append(this_genres[j])
+        for item in val.split(','):
+            if item not in all_genres and item != '':
+                all_genres.append(item)
     all_genres.sort()
-    all_genres = [genre for genre in all_genres if genre != '']
     return all_genres
 
 def get_all_tags():
     tags = df['Tags']
+    if USE_CUDF:
+        unique_vals = set()
+        for val in tags.fillna('').to_pandas().tolist():
+            if isinstance(val, str) and val:
+                unique_vals.update([v for v in val.split(',') if v])
+        return sorted(list(unique_vals))
     all_tags = []
-    for i in range(len(tags)):
-        if type(tags[i]) != str:
+    for val in tags:
+        if type(val) != str:
             continue
-        this_tags = tags[i].split(',')
-        for j in range(len(this_tags)):
-            if this_tags[j] not in all_tags:
-                all_tags.append(this_tags[j])
+        for item in val.split(','):
+            if item not in all_tags and item != '':
+                all_tags.append(item)
     all_tags.sort()
-    all_tags = [tag for tag in all_tags if tag != '']
     return all_tags
 
 def get_all_platforms():
@@ -93,99 +191,98 @@ def get_all_platforms():
     
 
 def get_games_by_category(category, df=df):
-    games = []
     if len(category) < 1:
         return df
-    for i in range(len(df)):
-        if type(df['Categories'][i]) != str:
-            continue
-        if set(category).issubset(set(df['Categories'][i].split(','))):
-            games.append(df.iloc[i].to_dict())
-    return pd.DataFrame(games)
+    mask = None
+    for cat in category:
+        pattern = rf"(^|,){re.escape(cat)}(,|$)"
+        col = df['Categories']
+        curr = _string_contains(col, pattern)
+        mask = curr if mask is None else (mask & curr)
+    return df[mask]
 
 def get_games_by_genre(genre, df=df):
-    games = []
     if len(genre) < 1:
         return df
-    for i in range(len(df)):
-        if type(df['Genres'].values[i]) != str:
-            continue
-        if set(genre).issubset(set(df['Genres'].values[i].split(','))):
-            games.append(df.iloc[i].to_dict())
-    return pd.DataFrame(games)
+    mask = None
+    for g in genre:
+        pattern = rf"(^|,){re.escape(g)}(,|$)"
+        col = df['Genres']
+        curr = _string_contains(col, pattern)
+        mask = curr if mask is None else (mask & curr)
+    return df[mask]
 
 def get_games_by_tag(tag, df=df):
-    games = []
     if len(tag) < 1:
         return df
-    for i in range(len(df)):
-        if type(df['Tags'][i]) != str:
-            continue
-        if set(tag).issubset(set(df['Tags'][i].split(','))):
-            games.append(df.iloc[i].to_dict())
-    return pd.DataFrame(games)
+    mask = None
+    for t in tag:
+        pattern = rf"(^|,){re.escape(t)}(,|$)"
+        col = df['Tags']
+        curr = _string_contains(col, pattern)
+        mask = curr if mask is None else (mask & curr)
+    return df[mask]
 
 def get_games_by_platform(platform, df=df):
-    bool_platform = [False] * 3
-    for j in platform:
-        if j in ['Windows', 'Mac', 'Linux']:
-            bool_platform[['Windows', 'Mac', 'Linux'].index(j)] = True
-    games = []
-    for i in range(len(df)):                
-        if bool_platform[0] and not df['Windows'].values[i]:
-            continue
-        if bool_platform[1] and not df['Mac'].values[i]:
-            continue
-        if bool_platform[2] and not df['Linux'].values[i]:
-            continue
-        games.append(df.iloc[i].to_dict())
-    return pd.DataFrame(games)
+    platforms = set(platform if isinstance(platform, (list, tuple, set)) else [platform])
+    mask = None
+    if 'Windows' in platforms:
+        curr = df['Windows'] == True
+        mask = curr if mask is None else (mask & curr)
+    if 'Mac' in platforms:
+        curr = df['Mac'] == True
+        mask = curr if mask is None else (mask & curr)
+    if 'Linux' in platforms:
+        curr = df['Linux'] == True
+        mask = curr if mask is None else (mask & curr)
+    return df if mask is None else df[mask]
 
 def get_games_by_name(name, df=df):
-    games = []
     if len(name) < 1:
         return df
-    for i in range(len(df)):
-        if type(df['Name'][i]) != str:
-            continue
-        if name.lower() in df['Name'][i].lower():
-            games.append(df.iloc[i].to_dict())
-    return pd.DataFrame(games)
+    pattern = re.escape(name.lower())
+    name_series = df['Name']
+    if USE_CUDF:
+        lower_series = name_series.fillna('').str.lower()
+        mask = lower_series.str.contains(pattern, regex=True)
+        return df[mask]
+    # S'assurer d'être sur pandas si besoin
+    ps = _to_pandas(name_series)
+    return df[ps.str.lower().str.contains(pattern, regex=True, na=False)]
 
 def get_game_by_id(id, df=df):
-    print(df['AppID'])
     data = df[df['AppID'] == int(id)]
-    if data.empty:
+    if (USE_CUDF and len(data) == 0) or (not USE_CUDF and data.empty):
         return None
-    return data.to_dict(orient='records')[0]
+    return _to_pandas(data).to_dict(orient='records')[0]
 
 def order_by_alphabetical(df=df):
-    if df.empty:
+    if (not USE_CUDF and df.empty) or (USE_CUDF and len(df) == 0):
         return df
     return df.sort_values(by='Name')
 
 def order_by_alphabetical_reverse(df=df):
-    if df.empty:
+    if (not USE_CUDF and df.empty) or (USE_CUDF and len(df) == 0):
         return df
     return df.sort_values(by='Name', ascending=False)
 
 def order_by_price(df=df):
-    if df.empty:
+    if (not USE_CUDF and df.empty) or (USE_CUDF and len(df) == 0):
         return df
     return df.sort_values(by='Price')
 
 def order_by_price_reverse(df=df):
-    if df.empty:
+    if (not USE_CUDF and df.empty) or (USE_CUDF and len(df) == 0):
         return df
     return df.sort_values(by='Price', ascending=False)
 
 def order_by_metacritic(df=df):
-    if df.empty:
+    if (not USE_CUDF and df.empty) or (USE_CUDF and len(df) == 0):
         return df
     return df.sort_values(by='Metacritic score')
 
 def order_by_metacritic_reverse(df=df):
-    if df.empty:
+    if (not USE_CUDF and df.empty) or (USE_CUDF and len(df) == 0):
         return df
     return df.sort_values(by='Metacritic score', ascending=False)
 
@@ -226,59 +323,61 @@ def get_platforms():
         return f.read().split('\n')
     
 def random_games(n=10, df=df):
-    games = []
-    indices = random.sample(range(len(df)), n)
-    for i in indices:
-        games.append(df.iloc[i].to_dict())
-    return pd.DataFrame(games)
+    try:
+        sampled = df.sample(n=n)
+        return sampled
+    except Exception:
+        games = []
+        indices = random.sample(range(len(df)), n)
+        for i in indices:
+            games.append(_to_pandas(df.iloc[[i]]) .to_dict(orient='records')[0])
+        return pd.DataFrame(games)
 
 def get_data_page(page, per_page, df=df):
     page = page - 1
     return df.iloc[page*per_page:(page+1)*per_page]
 
 def get_games_by_price_range(min_price, max_price, df=df):
-    games = []
-    for i in range(len(df)):
-        if df['Price'][i] == '':
-            continue
-        price = df['Price'][i]
-        if price >= float(min_price) and price <= float(max_price):
-            games.append(df.iloc[i].to_dict())
-    return pd.DataFrame(games)
+    price_series = df['Price']
+    price_series = _ensure_series_numeric(price_series)
+    return df[(price_series >= float(min_price)) & (price_series <= float(max_price))]
 
 def get_games_by_metacritic_range(min_metacritic, max_metacritic, df=df):
-    games = []
-    for i in range(len(df)):
-        if df['Metacritic score'][i] == '':
-            continue
-        metacritic = df['Metacritic score'][i]
-        if metacritic >= float(min_metacritic) and metacritic <= float(max_metacritic):
-            games.append(df.iloc[i].to_dict())
-    return pd.DataFrame(games)
+    score_series = df['Metacritic score']
+    score_series = _ensure_series_numeric(score_series)
+    return df[(score_series >= float(min_metacritic)) & (score_series <= float(max_metacritic))]
 
 def get_min_price(df=df):
-    df = order_by_price(df)
-    if df.empty:
+    df_sorted = order_by_price(df)
+    if (USE_CUDF and len(df_sorted) == 0) or (not USE_CUDF and df_sorted.empty):
         return 0
-    return df.head(1)['Price'].values[0]
+    if USE_CUDF:
+        return float(df_sorted.head(1)['Price'].to_pandas().values[0])
+    return df_sorted.head(1)['Price'].values[0]
 
 def get_max_price(df=df):
-    df = order_by_price_reverse(df)
-    if df.empty:
+    df_sorted = order_by_price_reverse(df)
+    if (USE_CUDF and len(df_sorted) == 0) or (not USE_CUDF and df_sorted.empty):
         return 0
-    return df.head(1)['Price'].values[0]
+    if USE_CUDF:
+        return float(df_sorted.head(1)['Price'].to_pandas().values[0])
+    return df_sorted.head(1)['Price'].values[0]
 
 def get_min_metacritic(df=df):
-    df = order_by_metacritic(df)
-    if df.empty:
+    df_sorted = order_by_metacritic(df)
+    if (USE_CUDF and len(df_sorted) == 0) or (not USE_CUDF and df_sorted.empty):
         return 0
-    return df.head(1)['Metacritic score'].values[0]
+    if USE_CUDF:
+        return float(df_sorted.head(1)['Metacritic score'].to_pandas().values[0])
+    return df_sorted.head(1)['Metacritic score'].values[0]
 
 def get_max_metacritic(df=df):
-    df = order_by_metacritic_reverse(df)
-    if df.empty:
+    df_sorted = order_by_metacritic_reverse(df)
+    if (USE_CUDF and len(df_sorted) == 0) or (not USE_CUDF and df_sorted.empty):
         return 0
-    return df.head(1)['Metacritic score'].values[0]
+    if USE_CUDF:
+        return float(df_sorted.head(1)['Metacritic score'].to_pandas().values[0])
+    return df_sorted.head(1)['Metacritic score'].values[0]
 
 def get_new_appid():
     while True:
@@ -289,17 +388,23 @@ def get_new_appid():
 def add_game(name, price, metacritic_score, genres, categories, tags, windows, mac, linux, release_date, header_image):
     global df
     appid = get_new_appid()
-    new_game = pd.DataFrame([[appid, name, release_date, '', '', '', price, '', '', '', '', '', header_image, '', '', '', windows, mac, linux, metacritic_score, '', '', '', '', '', '', '', '', '', '', '', '', '', '', categories, genres, tags, '', '']], columns=df.columns)
-    df = df._append(new_game, ignore_index=True)
-    df.to_csv(filename, index=False, encoding='utf-8')
+    new_row = [[appid, name, release_date, '', '', '', price, '', '', '', '', '', header_image, '', '', '', windows, mac, linux, metacritic_score, '', '', '', '', '', '', '', '', '', '', '', '', '', '', categories, genres, tags, '', '']]
+    if USE_CUDF:
+        new_game = _gd.DataFrame(new_row, columns=_to_pandas(df).columns)
+        df = _gd.concat([df, new_game], ignore_index=True)
+        _to_pandas(df).to_csv(filename, index=False, encoding='utf-8')
+    else:
+        new_game = pd.DataFrame(new_row, columns=df.columns)
+        df = df._append(new_game, ignore_index=True)
+        df.to_csv(filename, index=False, encoding='utf-8')
     return appid
 
 def update_game(appid, name, price, metacritic_score, genres, categories, tags, windows, mac, linux, release_date, header_image):
     global df
     data = df[df['AppID'] == int(appid)]
-    if data.empty:
+    if (USE_CUDF and len(data) == 0) or (not USE_CUDF and data.empty):
         return False
-    index = data.index[0]
+    index = int(_to_pandas(data).index[0])
     df.at[index, 'Name'] = name
     df.at[index, 'Price'] = price
     df.at[index, 'Metacritic score'] = metacritic_score
@@ -311,108 +416,93 @@ def update_game(appid, name, price, metacritic_score, genres, categories, tags, 
     df.at[index, 'Linux'] = linux
     df.at[index, 'Release date'] = release_date
     df.at[index, 'Header image'] = header_image
-    df.to_csv(filename, index=False, encoding='utf-8')
+    _to_pandas(df).to_csv(filename, index=False, encoding='utf-8')
     return True
 
 def delete_game(appid):
     global df
     data = df[df['AppID'] == int(appid)]
-    if data.empty:
+    if (USE_CUDF and len(data) == 0) or (not USE_CUDF and data.empty):
         return False
-    index = data.index[0]
-    df.drop(index, inplace=True)
-    df.to_csv(filename, index=False, encoding='utf-8')
+    index = int(_to_pandas(data).index[0])
+    df = df.drop(index)
+    _to_pandas(df).to_csv(filename, index=False, encoding='utf-8')
     return True
 
 def graph_prix_moyen_year(df=df):
-    df = df[df['Price'] != 0.0]
-    years = []
-    for i in range(len(df)):
-        if type(df['Release date'].values[i]) != str:
-            continue
-        date = to_date(df['Release date'].values[i])
-        year = date.split('-')[0]
-        if year not in years:
-            years.append(year)
-    years.sort()
-    moyennes = []
-    for year in years:
-        total = 0
-        count = 0
-        for i in range(len(df)):
-            if type(df['Release date'].values[i]) != str:
-                continue
-            date = to_date(df['Release date'].values[i])
-            if date.split('-')[0] == year:
-                total += df['Price'].values[i]
-                count += 1
-        if count == 0:
-            moyennes.append(0)
-        else:
-            moyennes.append(round((total/count), 2))
-    return pd.DataFrame({'Year': years, 'Average Price': moyennes})
+    price_series = _ensure_series_numeric(df['Price'])
+    gdf = df[(price_series != 0.0) & price_series.notna()]
+    pdf = _to_pandas(gdf).copy()
+    pdf['__year__'] = pdf['Release date'].apply(to_date).str.slice(0, 4)
+    grouped = pdf.groupby('__year__')['Price'].mean().reset_index()
+    grouped.columns = ['Year', 'Average Price']
+    grouped['Average Price'] = grouped['Average Price'].round(2)
+    return grouped
 
 def graph_genre_hight_price(df=df):
     genres = get_all_genres()
-    df = df[df['Price'] != 0.0]
-    df = df[df['Genres'] != '']
+    price_series = _ensure_series_numeric(df['Price'])
+    df2 = df[(price_series != 0.0) & price_series.notna() & (df['Genres'] != '')]
     prices = []
     games_names = []
     for genre in genres:
-        genre_games = get_games_by_genre([genre], df)
-        if genre_games.empty:
+        genre_games = get_games_by_genre([genre], df2)
+        pdf = _to_pandas(genre_games)
+        if pdf.empty:
             prices.append(0)
             games_names.append('')
         else:
-            prices.append(genre_games['Price'].max())
-            games_names.append(genre_games[genre_games['Price'] == genre_games['Price'].max()]['Name'].values[0])
+            max_price = pdf['Price'].max()
+            prices.append(max_price)
+            games_names.append(pdf[pdf['Price'] == max_price]['Name'].values[0])
     return pd.DataFrame({'Genre': genres, 'Highest Price': prices, 'Game Name': games_names})
 
 def graph_best_score_platform_label_name(df=df):
     platforms = get_all_platforms()
-    df = df[df['Metacritic score'] != '']
-    df = df[df['Metacritic score'] != 0]
+    score_series = _ensure_series_numeric(df['Metacritic score'])
+    df2 = df[(score_series != 0) & score_series.notna()]
     scores = []
     games_names = []
     for platform in platforms:
-        platform_games = get_games_by_platform([platform], df)
-        if platform_games.empty:
+        platform_games = get_games_by_platform([platform], df2)
+        pdf = _to_pandas(platform_games)
+        if pdf.empty:
             scores.append(0)
             games_names.append('')
         else:
-            scores.append(platform_games['Metacritic score'].max())
-            games_names.append(platform_games[platform_games['Metacritic score'] == platform_games['Metacritic score'].max()]['Name'].values[0])
+            max_score = pdf['Metacritic score'].max()
+            scores.append(max_score)
+            games_names.append(pdf[pdf['Metacritic score'] == max_score]['Name'].values[0])
     return pd.DataFrame({'Platform': platforms, 'Best Score': scores, 'Game Name': games_names})
 
 def graph_best_score_year_platform_label_name(platform, df=df):
-    df = df[df['Metacritic score'] != '']
-    df = df[df['Metacritic score'] != 0]
-    df = get_games_by_platform([platform], df)
-    years = []
+    score_series = _ensure_series_numeric(df['Metacritic score'])
+    df2 = df[(score_series != 0) & score_series.notna()]
+    df2 = get_games_by_platform([platform], df2)
+    pdf = _to_pandas(df2).copy()
+    years_unique = pdf['Release date'].dropna().apply(to_date).str.slice(0, 4).unique().tolist()
+    years_unique.sort()
     scores = []
     games_names = []
-    for i in range(len(df)):
-        if type(df['Release date'].values[i]) != str:
-            continue
-        date = to_date(df['Release date'].values[i])
-        year = date.split('-')[0]
-        if year not in years:
-            years.append(year)
-    years.sort()
-    for year in years:
-        year_games = df[df['Release date'].apply(to_date).str.contains(year)]
+    dates = pdf['Release date'].dropna().apply(to_date)
+    for year in years_unique:
+        year_mask = dates.str.contains(year)
+        year_games = pdf[year_mask]
         if year_games.empty:
             scores.append(0)
             games_names.append('')
         else:
-            scores.append(year_games['Metacritic score'].max())
-            games_names.append(year_games[year_games['Metacritic score'] == year_games['Metacritic score'].max()]['Name'].values[0])
-    return pd.DataFrame({'Year': years, 'Best Score': scores, 'Game Name': games_names})
+            max_score = year_games['Metacritic score'].max()
+            scores.append(max_score)
+            games_names.append(year_games[year_games['Metacritic score'] == max_score]['Name'].values[0])
+    return pd.DataFrame({'Year': years_unique, 'Best Score': scores, 'Game Name': games_names})
 
 @app.route('/')
 def home():
-    
-    df = get_data()
+    t0 = time.perf_counter()
+    engine_name = _resolve_engine(request.args)
+
+    df = _ensure_engine_frame(get_data())
 
     args = request.args
     print(args)
@@ -522,7 +612,7 @@ def home():
     
     # Convertir le DataFrame en dictionnaire pour le passer au template
     print(df)
-    data = df.to_dict(orient='records')
+    data = _to_pandas(df).to_dict(orient='records')
     
     tag = get_tags()
     genre = get_genres()
@@ -530,8 +620,9 @@ def home():
     category = get_categories()
     
     total_pages = total_games // per_page + 1
-    
-    return render_template('index.html', data=data, tag=tag, genre=genre, platform=platform, category=category, page=page, per_page=per_page, total_pages=total_pages, total_games=total_games, min_price=min_price, max_price=max_price, min_metacritic=min_metacritic, max_metacritic=max_metacritic)
+
+    process_ms = int((time.perf_counter() - t0) * 1000)
+    return render_template('index.html', data=data, tag=tag, genre=genre, platform=platform, category=category, page=page, per_page=per_page, total_pages=total_pages, total_games=total_games, min_price=min_price, max_price=max_price, min_metacritic=min_metacritic, max_metacritic=max_metacritic, process_ms=process_ms, engine_name=engine_name, gpu_enabled=(engine_name=='cuDF'))
 
 @app.route('/game/<appid>')
 def game(appid):
@@ -737,10 +828,11 @@ def delete(appid):
 
 @app.route('/stats')
 def stats():
-    
+    t0 = time.perf_counter()
     args = request.args
-    
-    df = get_data()
+    engine_name = _resolve_engine(args)
+
+    df = _ensure_engine_frame(get_data())
     
     if 'graph' in args:
         if args['graph'] == 'genre_hight_price':
@@ -748,13 +840,15 @@ def stats():
             values = data['Highest Price'].tolist()
             labels = data['Genre'].tolist()
             names = data['Game Name'].tolist()
-            return render_template('stats.html', values=values, labels=labels, names=names)
+            process_ms = int((time.perf_counter() - t0) * 1000)
+            return render_template('stats.html', values=values, labels=labels, names=names, process_ms=process_ms, engine_name=engine_name, gpu_enabled=(engine_name=='cuDF'))
         elif args['graph'] == 'best_score_platform_label_name':
             data = graph_best_score_platform_label_name(df)
             values = data['Best Score'].tolist()
             labels = data['Platform'].tolist()
             names = data['Game Name'].tolist()
-            return render_template('stats.html', values=values, labels=labels, names=names)
+            process_ms = int((time.perf_counter() - t0) * 1000)
+            return render_template('stats.html', values=values, labels=labels, names=names, process_ms=process_ms, engine_name=engine_name, gpu_enabled=(engine_name=='cuDF'))
         elif args['graph'] == 'best_score_year_platform_label_name':
             datawindows = graph_best_score_year_platform_label_name('Windows', df)
             datamac = (graph_best_score_year_platform_label_name('Mac', df))
@@ -768,17 +862,25 @@ def stats():
             valueslinux = datalinux['Best Score'].tolist()
             labelslinux = datalinux['Year'].tolist()
             nameslinux = datalinux['Game Name'].tolist()
-            return render_template('stats.html', valueswindows=valueswindows, labelswindows=labelswindows, nameswindows=nameswindows, valuesmac=valuesmac, labelsmac=labelsmac, namesmac=namesmac, valueslinux=valueslinux, labelslinux=labelslinux, nameslinux=nameslinux) 
+            process_ms = int((time.perf_counter() - t0) * 1000)
+            return render_template('stats.html', valueswindows=valueswindows, labelswindows=labelswindows, nameswindows=nameswindows, valuesmac=valuesmac, labelsmac=labelsmac, namesmac=namesmac, valueslinux=valueslinux, labelslinux=labelslinux, nameslinux=nameslinux, process_ms=process_ms, engine_name=engine_name, gpu_enabled=(engine_name=='cuDF')) 
         else:
             data = graph_prix_moyen_year(df)
             values = data['Average Price'].tolist()
             labels = data['Year'].tolist()
-            return render_template('stats.html', values=values, labels=labels, names=[])
+            process_ms = int((time.perf_counter() - t0) * 1000)
+            return render_template('stats.html', values=values, labels=labels, names=[], process_ms=process_ms, engine_name=engine_name, gpu_enabled=(engine_name=='cuDF'))
     else:
         data = graph_prix_moyen_year(df)
         values = data['Average Price'].tolist()
         labels = data['Year'].tolist()
-        return render_template('stats.html', values=values, labels=labels)
+        process_ms = int((time.perf_counter() - t0) * 1000)
+        return render_template('stats.html', values=values, labels=labels, process_ms=process_ms, engine_name=engine_name, gpu_enabled=(engine_name=='cuDF'))
+
+@app.route('/settings')
+def settings():
+    # Page de paramètres front uniquement (le choix est géré via localStorage côté client)
+    return render_template('settings.html')
 
 if __name__ == '__main__':
     app.run(debug=True)

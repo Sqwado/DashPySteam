@@ -56,11 +56,16 @@
             </div>
         </div>
         <div class="w-24 h-full flex items-center justify-end mr-2">
-
+            <a href="/settings" class="mr-4 text-white bg-[#1B2838] p-2 rounded text-center">Paramètres</a>
         </div>
     </header>
     <main class="w-screen h-5/6 flex overflow-y-scroll justify-center items-center p-4">
-        <canvas id="myChart" class="w-full h-full"></canvas>
+        <div class="w-full">
+            <canvas id="myChart" class="w-full h-full"></canvas>
+            <div class="w-full flex items-center justify-center mt-4">
+                <p class="text-gray-300 text-sm">Moteur: {{ engine_name }} | GPU activé: {{ 'oui' if gpu_enabled else 'non' }} | Temps: {{ process_ms }} ms</p>
+            </div>
+        </div>
     </main>
 </body>
 
@@ -76,6 +81,22 @@
     });
 
     const args = new URLSearchParams(window.location.search);
+
+    // Appliquer la préférence stockée en localStorage (si présente)
+    (function applyEnginePref() {
+        const pref = localStorage.getItem('engine_pref');
+        if (pref === 'gpu') {
+            const url = new URL(window.location.href);
+            url.searchParams.set('gpu', '1');
+            if (args.get('gpu') !== '1') window.location.href = url.toString();
+        } else if (pref === 'cpu') {
+            const url = new URL(window.location.href);
+            url.searchParams.set('gpu', '0');
+            if (args.get('gpu') !== '0') window.location.href = url.toString();
+        } else if (args.has('gpu')) {
+            localStorage.setItem('engine_pref', args.get('gpu') === '1' ? 'gpu' : 'cpu');
+        }
+    })();
 
     if (args.has('graph')) {
         const value = args.get('graph');

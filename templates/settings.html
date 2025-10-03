@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <title>Paramètres</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="w-screen h-screen bg-[#1B2838] overflow-x-hidden flex flex-col">
+    <header class="w-screen h-1/6 bg-[#171D25] flex items-center justify-between px-4">
+        <a href="/" class="text-white">Accueil</a>
+        <h1 class="text-white text-xl">Paramètres</h1>
+        <div></div>
+    </header>
+    <main class="flex-1 p-6 text-white">
+        <div class="max-w-xl mx-auto bg-[#171D25] rounded p-6">
+            <h2 class="text-lg mb-4">Moteur de traitement</h2>
+            <p class="text-sm text-gray-300 mb-2">Choisissez où exécuter les filtres et agrégations.</p>
+            <div class="flex items-center space-x-4">
+                <label class="flex items-center space-x-2">
+                    <input type="radio" name="engine" value="auto" id="engine-auto">
+                    <span>Auto</span>
+                </label>
+                <label class="flex items-center space-x-2">
+                    <input type="radio" name="engine" value="cpu" id="engine-cpu">
+                    <span>CPU (pandas)</span>
+                </label>
+                <label class="flex items-center space-x-2">
+                    <input type="radio" name="engine" value="gpu" id="engine-gpu">
+                    <span>GPU (cuDF)</span>
+                </label>
+            </div>
+            <div class="mt-6 flex space-x-4">
+                <button id="save-btn" class="px-4 py-2 bg-blue-500 rounded">Enregistrer</button>
+                <a href="/" class="px-4 py-2 bg-gray-600 rounded">Retour</a>
+            </div>
+            <p id="saved-msg" class="text-green-400 mt-4 hidden">Préférence enregistrée.</p>
+        </div>
+    </main>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const radios = document.querySelectorAll('input[name="engine"]');
+            const saved = localStorage.getItem('engine_pref');
+            if (saved === 'gpu') {
+                document.getElementById('engine-gpu').checked = true;
+            } else if (saved === 'cpu') {
+                document.getElementById('engine-cpu').checked = true;
+            } else {
+                document.getElementById('engine-auto').checked = true;
+            }
+
+            document.getElementById('save-btn').addEventListener('click', function () {
+                const selected = Array.from(radios).find(r => r.checked)?.value || 'auto';
+                if (selected === 'auto') {
+                    localStorage.removeItem('engine_pref');
+                } else if (selected === 'gpu') {
+                    localStorage.setItem('engine_pref', 'gpu');
+                } else {
+                    localStorage.setItem('engine_pref', 'cpu');
+                }
+                const msg = document.getElementById('saved-msg');
+                msg.classList.remove('hidden');
+                setTimeout(() => msg.classList.add('hidden'), 1500);
+            });
+        });
+    </script>
+</body>
+
+</html>
+

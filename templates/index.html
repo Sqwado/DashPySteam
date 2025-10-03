@@ -84,6 +84,7 @@
             </div>
         </div>
         <div class="w-1/6 h-full flex items-center justify-end mr-2">
+            <a href="/settings" class="mr-4 text-white bg-[#1B2838] p-2 rounded text-center">Paramètres</a>
             <a href="/create" class="mr-4 text-white bg-blue-500 p-2 rounded text-center">Ajouter un jeu</a>
             <a href="/stats" class="mr-4 text-white bg-blue-500 p-2 rounded text-center">Afficher stat</a>
         </div>
@@ -291,6 +292,9 @@
                     {% endif %}
 
             </div>
+            <div class="w-full flex items-center justify-center">
+                <p class="text-gray-300 text-sm">Moteur: {{ engine_name }} | GPU activé: {{ 'oui' if gpu_enabled else 'non' }} | Temps: {{ process_ms }} ms</p>
+            </div>
         </article>
     </main>
 </body>
@@ -434,6 +438,21 @@
                     checkbox.checked = true;
                 }
             });
+        }
+
+        // Appliquer la préférence stockée en localStorage (si présente)
+        const pref = localStorage.getItem('engine_pref');
+        if (pref === 'gpu') {
+            const url = new URL(window.location.href);
+            url.searchParams.set('gpu', '1');
+            if (args.get('gpu') !== '1') document.location = url;
+        } else if (pref === 'cpu') {
+            const url = new URL(window.location.href);
+            url.searchParams.set('gpu', '0');
+            if (args.get('gpu') !== '0') document.location = url;
+        } else if (args.has('gpu')) {
+            // Synchroniser URL -> localStorage si déjà définie
+            localStorage.setItem('engine_pref', args.get('gpu') === '1' ? 'gpu' : 'cpu');
         }
 
         sortSelect.addEventListener('change', function () {
